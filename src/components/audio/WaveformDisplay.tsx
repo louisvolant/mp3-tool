@@ -1,7 +1,6 @@
 // src/components/audio/WaveformDisplay.tsx
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
-import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions';
 
 interface WaveformDisplayProps {
   audioFile: File | null;
@@ -15,7 +14,7 @@ interface WaveformDisplayProps {
   setCurrentTime: (time: number) => void;
   duration: number;
   showTimingMarkers: boolean;
-  clearRegions: () => void;
+  clearRegions: React.MutableRefObject<() => void>;
 }
 
 export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
@@ -34,74 +33,34 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
 }) => {
   const waveformContainerRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
-  const regionsPluginRef = useRef<any>(null); // Store RegionsPlugin instance
+  const [startPos, setStartPos] = useState(0);
+  const [endPos, setEndPos] = useState(1);
 
-  // Initialize WaveSurfer and RegionsPlugin
   useEffect(() => {
-    console.log('WaveformDisplay useEffect - initialization');
-    if (!waveformContainerRef.current) {
-      console.error('Waveform container not found in DOM');
-      return;
-    }
-
-    if (wavesurferRef.current) {
-      console.log('WaveSurfer instance already exists, skipping creation');
-      return;
-    }
-
-    console.log('Creating WaveSurfer instance');
-    console.log('Container:', waveformContainerRef.current);
+    if (!waveformContainerRef.current) return;
+    if (wavesurferRef.current) return;
 
     const wavesurfer = WaveSurfer.create({
       container: waveformContainerRef.current,
-        waveColor: '#A8DBA8',
-        progressColor: '#3B8686',
-        cursorColor: '#0B0C0C',
-        barWidth: 2,
-        barRadius: 3,
-        cursorWidth: 1,
-        height: 100,
-        responsive: true,
-        hideScrollbar: false,
-        fillParent: true
+      waveColor: '#A8DBA8',
+      progressColor: '#3B8686',
+      cursorColor: '#0B0C0C',
+      barWidth: 2,
+      barRadius: 3,
+      cursorWidth: 1,
+      height: 100,
+      fillParent: true,
     });
 
-  const regions = wavesurfer.registerPlugin(RegionsPlugin.create());
-  regionsPluginRef.current = regions;
-
-  console.log('RegionsPlugin registered:', regions); // Confirm plugin instance
-
-  regions.enableDragSelection({ color: 'rgba(0,255,0,0.3)' }); // Enable immediately
-  console.log('Drag selection enabled on init');
-
-  wavesurfer.on('ready', () => {
-    console.log('WaveSurfer ready');
-    setDuration(wavesurfer.getDuration());
-    setShowTimingMarkers(true);
-    console.log('Regions drag selection active:', regions.isDraggingEnabled); // Debug
-  });
-
-  wavesurfer.on('region-created', (region) => {
-    console.log('Region created:', region.start, region.end);
-    regions.getRegions().forEach((r: any) => {
-      if (r.id !== region.id) r.remove(); // Ensure only one region
-    });
-    setStartTime(region.start); // Sync with AudioEditor
-    setEndTime(region.end);     // Sync with AudioEditor
-  });
-
-  wavesurfer.on('region-update-end', (region) => {
-    console.log('Region updated:', region.start, region.end);
-    setStartTime(region.start); // Sync with AudioEditor
-    setEndTime(region.end);     // Sync with AudioEditor
-  });
-
-    wavesurfer.on('interaction', () => {
-      console.log('User interacted with waveform'); // Log any interaction
+    wavesurfer.on('ready', () => {
+      console.log('WaveSurfer ready');
+      setDuration(wavesurfer.getDuration());
+      setShowTimingMarkers(true);
+      setEndPos(1);
     });
 
     wavesurfer.on('timeupdate', (time) => {
-      setCurrentTime(time); // Update currentTime during playback
+      setCurrentTime(time);
     });
 
     wavesurfer.on('error', (error) => {
@@ -111,64 +70,58 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
     wavesurferRef.current = wavesurfer;
     setWaveform(wavesurfer);
 
-  // Expose clearRegions to parent
-  clearRegions.current = () => {
-    if (regionsPluginRef.current) {
-      console.log('Regions cleared');
-      const regions = regionsPluginRef.current.getRegions();
-      console.log('RegionList to clear:', JSON.stringify(regions));
-      regions.forEach((region: any) => {
-        console.log('Region to clear:', JSON.stringify(region));
-        region.remove();
-      });
+    clearRegions.current = () => {
+      setStartPos(0);
+      setEndPos(1);
       setStartTime(0);
-      setEndTime(0);
-      console.log('Regions cleared');
-    }
-  };
+      setEndTime(wavesurfer.getDuration() || 0);
+    };
 
     return () => {
-      console.log('Cleaning up WaveSurfer');
-      if (wavesurferRef.current) {
-        wavesurferRef.current.destroy();
-        wavesurferRef.current = null;
-        regionsPluginRef.current = null; // Clear plugin ref
-        setWaveform(null);
-      }
+      wavesurfer.destroy();
+      wavesurferRef.current = null;
+      setWaveform(null);
     };
-  }, [setWaveform, setDuration, setShowTimingMarkers, setStartTime, setEndTime]);
+  }, [setWaveform, setDuration, setShowTimingMarkers, setCurrentTime]);
 
-  // Load audio file
   useEffect(() => {
-    console.log('WaveformDisplay useEffect - audio file load', audioFile);
     if (audioFile && wavesurferRef.current) {
       const url = URL.createObjectURL(audioFile);
-      console.log('Loading audio:', url);
       wavesurferRef.current.load(url);
-
       wavesurferRef.current.on('ready', () => {
-        console.log('Audio loaded and waveform rendered');
+        setEndTime(wavesurferRef.current!.getDuration());
       });
-
-      wavesurferRef.current.on('error', (error) => {
-        console.error('Audio load error:', error);
-      });
-
-      return () => {
-        URL.revokeObjectURL(url);
-      };
+      return () => URL.revokeObjectURL(url);
     }
-  }, [audioFile]);
+  }, [audioFile, setEndTime]);
 
-  // Clear regions when no audio file
-  useEffect(() => {
-    if (!audioFile && wavesurferRef.current && regionsPluginRef.current) {
-      const regions = regionsPluginRef.current.getRegions();
-      regions.forEach((region: any) => region.remove());
-      setShowTimingMarkers(false);
-      console.log('Cleared regions due to no audio file');
-    }
-  }, [audioFile, setShowTimingMarkers]);
+  const handleDrag = (type: 'start' | 'end', e: React.MouseEvent) => {
+    const container = waveformContainerRef.current;
+    if (!container || !duration) return;
+
+    const rect = container.getBoundingClientRect();
+    const moveHandler = (moveEvent: MouseEvent) => {
+      const x = Math.max(rect.left, Math.min(rect.right, moveEvent.clientX));
+      const pos = (x - rect.left) / rect.width;
+      if (type === 'start') {
+        const newStart = Math.min(pos, endPos - 0.01);
+        setStartPos(newStart);
+        setStartTime(newStart * duration);
+      } else {
+        const newEnd = Math.max(pos, startPos + 0.01);
+        setEndPos(newEnd);
+        setEndTime(newEnd * duration);
+      }
+    };
+
+    const upHandler = () => {
+      document.removeEventListener('mousemove', moveHandler);
+      document.removeEventListener('mouseup', upHandler);
+    };
+
+    document.addEventListener('mousemove', moveHandler);
+    document.addEventListener('mouseup', upHandler);
+  };
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -176,21 +129,45 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  return (
-       <div className="relative mb-8 w-full">
-          <div ref={waveformContainerRef} className="mb-4 h-24 bg-gray-50 rounded-lg"></div>
-          {showTimingMarkers && (
-            <div className="flex justify-between mt-1 text-sm text-gray-600">
-              <div>{formatTime(0)}</div>
-              <div>{formatTime(currentTime)}</div>
-              <div>{formatTime(duration)}</div>
-            </div>
-          )}
-          <button onClick={() => regionsPluginRef.current?.addRegion({ start: 10, end: 20, color: 'rgba(0,255,0,0.3)' })}>
-            Add Test Region
-          </button>
-        </div>
+return (
+  <div className="relative w-full">
+    <div ref={waveformContainerRef} className="mb-4 h-24 bg-gray-50 rounded-lg relative">
+      {/* Start Control Bar */}
+      <div
+        className="absolute top-0 bottom-0 w-2 bg-green-500 cursor-ew-resize flex items-center justify-center z-10"
+        style={{ left: `${startPos * 100}%` }}
+        onMouseDown={(e) => handleDrag('start', e)}
+      >
+        <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
+      </div>
+      {/* End Control Bar */}
+      <div
+        className="absolute top-0 bottom-0 w-2 bg-red-500 cursor-ew-resize flex items-center justify-center z-10"
+        style={{ left: `${endPos * 100}%` }}
+        onMouseDown={(e) => handleDrag('end', e)}
+      >
+        <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
+      </div>
+      {/* Progress Bar */}
+      <div
+        className="absolute top-0 bottom-0 bg-blue-300 opacity-50 z-5"
+        style={{
+          left: `${startPos * 100}%`,
+          width: `${(endPos - startPos) * 100}%`,
+        }}
+      />
+    </div>
+    {showTimingMarkers && (
+      <div className="flex justify-between mt-1 text-sm text-gray-600">
+        <div>{formatTime(0)}</div>
+        <div>{formatTime(currentTime)}</div>
+        <div>{formatTime(duration)}</div>
+      </div>
+    )}
+  </div>
+
   );
 };
 
 export default WaveformDisplay;
+

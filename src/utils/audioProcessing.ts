@@ -82,7 +82,7 @@ export const trimAudio = (buffer: AudioBuffer, start: number, end: number) => {
     const endSample = Math.floor(end * buffer.sampleRate);
     const frameCount = endSample - startSample;
 
-    const offlineCtx = new (window.OfflineAudioContext || window.webkitOfflineAudioContext)(
+    const offlineCtx = new OfflineAudioContext(
       buffer.numberOfChannels,
       frameCount,
       buffer.sampleRate

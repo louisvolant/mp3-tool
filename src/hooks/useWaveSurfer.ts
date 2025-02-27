@@ -57,8 +57,7 @@ export const useWaveSurfer = (options: UseWaveSurferOptions): UseWaveSurferRetur
       barWidth: 2,
       barRadius: 3,
       cursorWidth: 1,
-      height: 200,
-      responsive: true,
+      height: 200
     });
 
     // Initialize regions plugin
@@ -86,24 +85,6 @@ export const useWaveSurfer = (options: UseWaveSurferOptions): UseWaveSurferRetur
     ws.on('timeupdate', (time) => {
       setCurrentTime(time);
       if (options.onTimeUpdate) options.onTimeUpdate(time);
-    });
-
-    ws.on('region-created', (region) => {
-      activeRegionRef.current = region;
-
-      // Clear other regions
-      const regions = regionsRef.current.getRegions();
-      regions.forEach((r: any) => {
-        if (r.id !== region.id) {
-          r.remove();
-        }
-      });
-
-      if (options.onRegionCreated) options.onRegionCreated(region.start, region.end);
-    });
-
-    ws.on('region-update-end', (region) => {
-      if (options.onRegionUpdated) options.onRegionUpdated(region.start, region.end);
     });
 
     setWavesurfer(ws);

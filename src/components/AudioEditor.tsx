@@ -10,6 +10,12 @@ import { ExportPanels } from './audio/ExportPanels';
 import { WaveformDisplay } from './audio/WaveformDisplay';
 import { EffectPanels } from './audio/EffectPanels';
 
+declare global {
+  interface Window {
+    Mp3Encoder: any;
+  }
+}
+
 const AudioEditor = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [waveform, setWaveform] = useState<WaveSurfer | null>(null);
@@ -25,6 +31,13 @@ const AudioEditor = () => {
   const [endTime, setEndTime] = useState(0);
   const [showTimingMarkers, setShowTimingMarkers] = useState(false);
 
+  // Define formatTime
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
   const clearRegionsRef = useRef<() => void>(() => {}); // Ref to hold the function
 
   const clearSelections = () => {
@@ -39,12 +52,12 @@ const AudioEditor = () => {
     }
   };
 
-// src/components/AudioEditor.tsx
+
 useEffect(() => {
   const script = document.createElement('script');
-  script.src = '/lame.min.js';
+  script.src = 'https://unpkg.com/lamejs@1.2.1/lame.min.js';
   script.onload = () => {
-    console.log('lamejs loaded');
+    console.log('lamejs loaded', window.Mp3Encoder, window.lamejs, window.lamejs?.Mp3Encoder);
   };
   script.onerror = () => {
     console.error('Failed to load lamejs');
@@ -73,10 +86,10 @@ const saveFile = async () => {
     const sampleRate = processedBuffer.sampleRate;
     const numChannels = processedBuffer.numberOfChannels;
     const bitrateNum = parseInt(bitrate);
-    if (!window.Mp3Encoder) {
-      throw new Error('Mp3Encoder not available on window');
+    if (!window.lamejs || !window.lamejs.Mp3Encoder) {
+      throw new Error('Mp3Encoder not available on window.lamejs');
     }
-    const mp3Encoder = new window.Mp3Encoder(numChannels, sampleRate, bitrateNum); // Directly on window
+    const mp3Encoder = new window.lamejs.Mp3Encoder(numChannels, sampleRate, bitrateNum);
     const mp3Data: ArrayBuffer[] = [];
 
     const samplesLeft = processedBuffer.getChannelData(0);
@@ -121,6 +134,8 @@ const saveFile = async () => {
 };
 
 
+
+
 const resetEditor = () => {
   setAudioFile(null);
   setVolume(0);
@@ -131,13 +146,21 @@ const resetEditor = () => {
   setStartTime(0);
   setEndTime(0);
   setShowTimingMarkers(false);
-  waveform?.stop(); // Stop playback
+  waveform?.destroy();
   setWaveform(null);
-  clearRegionsRef.current(); // Clear regions
+  clearRegionsRef.current(); // Resets startPos and endPos
 };
 
-  const previewFade = async (type: 'fadeIn' | 'fadeOut') => {
-    const processedBuffer = await processAudio(type);
+const previewFade = async (type: 'fadeIn' | 'fadeOut') => {
+  const processedBuffer = await processAudio(
+    type,
+    audioFile!,
+    volume,
+    fadeInDuration,
+    fadeOutDuration,
+    startTime,
+    endTime
+  );
     if (processedBuffer && waveform) {
       const blob = new Blob([bufferToWav(processedBuffer)], { type: 'audio/wav' });
       const url = URL.createObjectURL(blob);
@@ -166,18 +189,6 @@ useEffect(() => {
   console.log('AudioEditor - startTime:', startTime, 'endTime:', endTime);
 }, [startTime, endTime]);
 
-useEffect(() => {
-  const script = document.createElement('script');
-  script.src = '/lame.min.js';
-  script.onload = () => {
-    console.log('lamejs loaded');
-    // Now window.Mp3Encoder should be available
-  };
-  document.body.appendChild(script);
-  return () => {
-    document.body.removeChild(script);
-  };
-}, []);
 
   return (
     <div className="p-4 max-w-4xl mx-auto relative">
@@ -237,7 +248,7 @@ useEffect(() => {
                 <button
                   onClick={() => {
                     if (Math.abs(startTime - endTime) > 0.001) {
-                      processAudio('trim', audioFile, volume, fadeInDuration, fadeOutDuration, startTime, endTime);
+                      processAudio('trim', audioFile!, volume, fadeInDuration, fadeOutDuration, startTime, endTime);
                     }
                   }}
                   className={`px-4 py-2 bg-blue-600 text-white rounded ${Math.abs(startTime - endTime) <= 0.001 ? 'opacity-50 cursor-not-allowed' : ''}`}
