@@ -43,7 +43,7 @@ export default function RootLayout({
         <header className="bg-blue-600 dark:bg-blue-800 text-white py-4">
           <div className="container mx-auto px-4 flex items-center">
             <Image
-              src="/icon_music.svg"
+              src="/icon_music.png"
               alt="Mp3 Tool Logo"
               width={32}
               height={32}
