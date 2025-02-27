@@ -2,8 +2,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import WaveSurfer from 'wavesurfer.js';
-import { useWaveSurfer } from '../hooks/useWaveSurfer';
-import { processAudio, applyVolume, applyFade, trimAudio } from '../utils/audioProcessing';
+import { processAudio } from '../utils/audioProcessing';
 import { bufferToWav } from '../utils/fileUtils';
 import { AudioControls } from './audio/AudioControls';
 import { ExportPanels } from './audio/ExportPanels';
@@ -57,7 +56,7 @@ useEffect(() => {
   const script = document.createElement('script');
   script.src = 'https://unpkg.com/lamejs@1.2.1/lame.min.js';
   script.onload = () => {
-    console.log('lamejs loaded', window.Mp3Encoder, window.lamejs, window.lamejs?.Mp3Encoder);
+    console.log('lamejs loaded', window.lamejs, window.lamejs?.Mp3Encoder); // Removed window.Mp3Encoder
   };
   script.onerror = () => {
     console.error('Failed to load lamejs');

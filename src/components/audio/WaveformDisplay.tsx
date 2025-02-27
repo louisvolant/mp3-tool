@@ -4,7 +4,6 @@ import WaveSurfer from 'wavesurfer.js';
 
 interface WaveformDisplayProps {
   audioFile: File | null;
-  waveform: WaveSurfer | null;
   setWaveform: (waveform: WaveSurfer | null) => void;
   setDuration: (duration: number) => void;
   setShowTimingMarkers: (show: boolean) => void;
@@ -19,7 +18,6 @@ interface WaveformDisplayProps {
 
 export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   audioFile,
-  waveform,
   setWaveform,
   setDuration,
   setShowTimingMarkers,
@@ -36,80 +34,65 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   const [startPos, setStartPos] = useState(0);
   const [endPos, setEndPos] = useState(1);
 
-useEffect(() => {
-  if (!waveformContainerRef.current) return;
-
-  // Destroy existing instance if it exists
-  if (wavesurferRef.current) {
-    wavesurferRef.current.destroy();
-    wavesurferRef.current = null;
-  }
-
-  const wavesurfer = WaveSurfer.create({
-    container: waveformContainerRef.current,
-    waveColor: '#A8DBA8',
-    progressColor: '#3B8686',
-    cursorColor: '#0B0C0C',
-    barWidth: 2,
-    barRadius: 3,
-    cursorWidth: 1,
-    height: 100,
-    fillParent: true,
-  });
-
-  wavesurfer.on('ready', () => {
-    console.log('WaveSurfer ready');
-    setDuration(wavesurfer.getDuration());
-    setShowTimingMarkers(true);
-    setEndPos(1);
-  });
-
-  wavesurfer.on('timeupdate', (time) => {
-    setCurrentTime(time);
-  });
-
-  wavesurfer.on('error', (error) => {
-    console.error('WaveSurfer error:', error);
-  });
-
-  wavesurferRef.current = wavesurfer;
-  setWaveform(wavesurfer);
-
-  clearRegions.current = () => {
-    setStartPos(0);
-    setEndPos(1);
-    setStartTime(0);
-    setEndTime(wavesurfer.getDuration() || 0);
-  };
-
-  // Load audio if it exists
-  if (audioFile) {
-    const url = URL.createObjectURL(audioFile);
-    wavesurfer.load(url);
-    return () => URL.revokeObjectURL(url);
-  }
-
-  return () => {
-    wavesurfer.destroy();
-    wavesurferRef.current = null;
-    setWaveform(null);
-  };
-}, [audioFile, setWaveform, setDuration, setShowTimingMarkers, setCurrentTime]);
-
-
-
   useEffect(() => {
-    if (audioFile && wavesurferRef.current) {
+    if (!waveformContainerRef.current) return;
+
+    if (wavesurferRef.current) {
+      wavesurferRef.current.destroy();
+      wavesurferRef.current = null;
+    }
+
+    const wavesurfer = WaveSurfer.create({
+      container: waveformContainerRef.current,
+      waveColor: '#A8DBA8',
+      progressColor: '#3B8686',
+      cursorColor: '#0B0C0C',
+      barWidth: 2,
+      barRadius: 3,
+      cursorWidth: 1,
+      height: 100,
+      fillParent: true,
+    });
+
+    wavesurfer.on('ready', () => {
+      console.log('WaveSurfer ready');
+      setDuration(wavesurfer.getDuration());
+      setShowTimingMarkers(true);
+      setEndPos(1);
+    });
+
+    wavesurfer.on('timeupdate', (time) => {
+      setCurrentTime(time);
+    });
+
+    wavesurfer.on('error', (error) => {
+      console.error('WaveSurfer error:', error);
+    });
+
+    wavesurferRef.current = wavesurfer;
+    setWaveform(wavesurfer);
+
+    clearRegions.current = () => {
+      setStartPos(0);
+      setEndPos(1);
+      setStartTime(0);
+      setEndTime(wavesurfer.getDuration() || 0);
+    };
+
+    if (audioFile) {
       const url = URL.createObjectURL(audioFile);
-      wavesurferRef.current.load(url);
-      wavesurferRef.current.on('ready', () => {
-        setEndTime(wavesurferRef.current!.getDuration());
-      });
+      wavesurfer.load(url);
       return () => URL.revokeObjectURL(url);
     }
-  }, [audioFile, setEndTime]);
 
-  const handleDrag = (type: 'start' | 'end', e: React.MouseEvent) => {
+    return () => {
+      wavesurfer.destroy();
+      wavesurferRef.current = null;
+      setWaveform(null);
+    };
+  }, [audioFile, setWaveform, setDuration, setShowTimingMarkers, setCurrentTime, clearRegions, setStartTime, setEndTime]);
+
+  const handleDrag = (type: 'start' | 'end') => {
     const container = waveformContainerRef.current;
     if (!container || !duration) return;
 
@@ -152,7 +135,7 @@ return (
           <div
             className="absolute top-0 bottom-0 w-2 bg-green-500 cursor-ew-resize flex items-center justify-center z-10 rounded-md shadow-md hover:bg-green-600 transition-colors"
             style={{ left: `${startPos * 100}%` }}
-            onMouseDown={(e) => handleDrag('start', e)}
+            onMouseDown={() => handleDrag('start')}
           >
             <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
           </div>
@@ -160,7 +143,7 @@ return (
           <div
             className="absolute top-0 bottom-0 w-2 bg-red-500 cursor-ew-resize flex items-center justify-center z-10 rounded-md shadow-md hover:bg-red-600 transition-colors"
             style={{ left: `${endPos * 100}%` }}
-            onMouseDown={(e) => handleDrag('end', e)}
+            onMouseDown={() => handleDrag('end')}
           >
             <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
           </div>
