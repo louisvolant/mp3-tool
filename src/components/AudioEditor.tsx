@@ -10,11 +10,7 @@ import { ExportPanels } from './audio/ExportPanels';
 import { WaveformDisplay } from './audio/WaveformDisplay';
 import { EffectPanels } from './audio/EffectPanels';
 
-declare global {
-  interface Window {
-    Mp3Encoder: any;
-  }
-}
+
 
 const AudioEditor = () => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
@@ -30,6 +26,10 @@ const AudioEditor = () => {
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(0);
   const [showTimingMarkers, setShowTimingMarkers] = useState(false);
+
+    useEffect(() => {
+      console.log('audioFile changed:', audioFile);
+    }, [audioFile]);
 
   // Define formatTime
   const formatTime = (seconds: number) => {
@@ -133,11 +133,8 @@ const saveFile = async () => {
   }
 };
 
-
-
-
 const resetEditor = () => {
-  setAudioFile(null);
+  setAudioFile(null); // Triggers UI reset
   setVolume(0);
   setFadeInDuration(0);
   setFadeOutDuration(0);
@@ -246,15 +243,28 @@ useEffect(() => {
                   Clear Selection
                 </button>
                 <button
-                  onClick={() => {
-                    if (Math.abs(startTime - endTime) > 0.001) {
-                      processAudio('trim', audioFile!, volume, fadeInDuration, fadeOutDuration, startTime, endTime);
+                  onClick={async () => {
+                    if (Math.abs(startTime - endTime) > 0.001 && audioFile) {
+                      const processedBuffer = await processAudio(
+                        'trim',
+                        audioFile,
+                        volume,
+                        fadeInDuration,
+                        fadeOutDuration,
+                        startTime,
+                        endTime
+                      );
+                      if (processedBuffer && waveform) {
+                        const blob = new Blob([bufferToWav(processedBuffer)], { type: 'audio/wav' });
+                        const url = URL.createObjectURL(blob);
+                        waveform.load(url);
+                      }
                     }
                   }}
                   className={`px-4 py-2 bg-blue-600 text-white rounded ${Math.abs(startTime - endTime) <= 0.001 ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={Math.abs(startTime - endTime) <= 0.001}
                 >
-                  Trim Selection
+                  Preview Trim
                 </button>
                 {startTime !== endTime && (
                   <span className="text-sm">

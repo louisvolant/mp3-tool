@@ -36,53 +36,67 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   const [startPos, setStartPos] = useState(0);
   const [endPos, setEndPos] = useState(1);
 
-  useEffect(() => {
-    if (!waveformContainerRef.current) return;
-    if (wavesurferRef.current) return;
+useEffect(() => {
+  if (!waveformContainerRef.current) return;
 
-    const wavesurfer = WaveSurfer.create({
-      container: waveformContainerRef.current,
-      waveColor: '#A8DBA8',
-      progressColor: '#3B8686',
-      cursorColor: '#0B0C0C',
-      barWidth: 2,
-      barRadius: 3,
-      cursorWidth: 1,
-      height: 100,
-      fillParent: true,
-    });
+  // Destroy existing instance if it exists
+  if (wavesurferRef.current) {
+    wavesurferRef.current.destroy();
+    wavesurferRef.current = null;
+  }
 
-    wavesurfer.on('ready', () => {
-      console.log('WaveSurfer ready');
-      setDuration(wavesurfer.getDuration());
-      setShowTimingMarkers(true);
-      setEndPos(1);
-    });
+  const wavesurfer = WaveSurfer.create({
+    container: waveformContainerRef.current,
+    waveColor: '#A8DBA8',
+    progressColor: '#3B8686',
+    cursorColor: '#0B0C0C',
+    barWidth: 2,
+    barRadius: 3,
+    cursorWidth: 1,
+    height: 100,
+    fillParent: true,
+  });
 
-    wavesurfer.on('timeupdate', (time) => {
-      setCurrentTime(time);
-    });
+  wavesurfer.on('ready', () => {
+    console.log('WaveSurfer ready');
+    setDuration(wavesurfer.getDuration());
+    setShowTimingMarkers(true);
+    setEndPos(1);
+  });
 
-    wavesurfer.on('error', (error) => {
-      console.error('WaveSurfer error:', error);
-    });
+  wavesurfer.on('timeupdate', (time) => {
+    setCurrentTime(time);
+  });
 
-    wavesurferRef.current = wavesurfer;
-    setWaveform(wavesurfer);
+  wavesurfer.on('error', (error) => {
+    console.error('WaveSurfer error:', error);
+  });
 
-    clearRegions.current = () => {
-      setStartPos(0);
-      setEndPos(1);
-      setStartTime(0);
-      setEndTime(wavesurfer.getDuration() || 0);
-    };
+  wavesurferRef.current = wavesurfer;
+  setWaveform(wavesurfer);
 
-    return () => {
-      wavesurfer.destroy();
-      wavesurferRef.current = null;
-      setWaveform(null);
-    };
-  }, [setWaveform, setDuration, setShowTimingMarkers, setCurrentTime]);
+  clearRegions.current = () => {
+    setStartPos(0);
+    setEndPos(1);
+    setStartTime(0);
+    setEndTime(wavesurfer.getDuration() || 0);
+  };
+
+  // Load audio if it exists
+  if (audioFile) {
+    const url = URL.createObjectURL(audioFile);
+    wavesurfer.load(url);
+    return () => URL.revokeObjectURL(url);
+  }
+
+  return () => {
+    wavesurfer.destroy();
+    wavesurferRef.current = null;
+    setWaveform(null);
+  };
+}, [audioFile, setWaveform, setDuration, setShowTimingMarkers, setCurrentTime]);
+
+
 
   useEffect(() => {
     if (audioFile && wavesurferRef.current) {
@@ -132,30 +146,34 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
 return (
   <div className="relative w-full">
     <div ref={waveformContainerRef} className="mb-4 h-24 bg-gray-50 rounded-lg relative">
-      {/* Start Control Bar */}
-      <div
-        className="absolute top-0 bottom-0 w-2 bg-green-500 cursor-ew-resize flex items-center justify-center z-10"
-        style={{ left: `${startPos * 100}%` }}
-        onMouseDown={(e) => handleDrag('start', e)}
-      >
-        <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
-      </div>
-      {/* End Control Bar */}
-      <div
-        className="absolute top-0 bottom-0 w-2 bg-red-500 cursor-ew-resize flex items-center justify-center z-10"
-        style={{ left: `${endPos * 100}%` }}
-        onMouseDown={(e) => handleDrag('end', e)}
-      >
-        <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
-      </div>
-      {/* Progress Bar */}
-      <div
-        className="absolute top-0 bottom-0 bg-blue-300 opacity-50 z-5"
-        style={{
-          left: `${startPos * 100}%`,
-          width: `${(endPos - startPos) * 100}%`,
-        }}
-      />
+      {audioFile && (
+        <>
+          {/* Start Control Bar */}
+          <div
+            className="absolute top-0 bottom-0 w-2 bg-green-500 cursor-ew-resize flex items-center justify-center z-10 rounded-md shadow-md hover:bg-green-600 transition-colors"
+            style={{ left: `${startPos * 100}%` }}
+            onMouseDown={(e) => handleDrag('start', e)}
+          >
+            <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
+          </div>
+          {/* End Control Bar */}
+          <div
+            className="absolute top-0 bottom-0 w-2 bg-red-500 cursor-ew-resize flex items-center justify-center z-10 rounded-md shadow-md hover:bg-red-600 transition-colors"
+            style={{ left: `${endPos * 100}%` }}
+            onMouseDown={(e) => handleDrag('end', e)}
+          >
+            <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
+          </div>
+          {/* Progress Bar */}
+          <div
+            className="absolute top-0 bottom-0 bg-blue-300 opacity-50 z-5 rounded-md"
+            style={{
+              left: `${startPos * 100}%`,
+              width: `${(endPos - startPos) * 100}%`,
+            }}
+          />
+        </>
+      )}
     </div>
     {showTimingMarkers && (
       <div className="flex justify-between mt-1 text-sm text-gray-600">
@@ -165,8 +183,7 @@ return (
       </div>
     )}
   </div>
-
-  );
+);
 };
 
 export default WaveformDisplay;
