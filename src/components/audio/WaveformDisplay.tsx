@@ -4,7 +4,6 @@ import WaveSurfer from 'wavesurfer.js';
 
 interface WaveformDisplayProps {
   audioFile: File | null;
-  setWaveform: (waveform: WaveSurfer | null) => void;
   setDuration: (duration: number) => void;
   setShowTimingMarkers: (show: boolean) => void;
   setStartTime: (time: number) => void;
@@ -18,7 +17,6 @@ interface WaveformDisplayProps {
 
 export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   audioFile,
-  setWaveform,
   setDuration,
   setShowTimingMarkers,
   setStartTime,
@@ -70,7 +68,6 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
     });
 
     wavesurferRef.current = wavesurfer;
-    setWaveform(wavesurfer);
 
     clearRegions.current = () => {
       setStartPos(0);
@@ -88,9 +85,8 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
     return () => {
       wavesurfer.destroy();
       wavesurferRef.current = null;
-      setWaveform(null);
     };
-  }, [audioFile, setWaveform, setDuration, setShowTimingMarkers, setCurrentTime, clearRegions, setStartTime, setEndTime]);
+  }, [audioFile, setDuration, setShowTimingMarkers, setCurrentTime, clearRegions, setStartTime, setEndTime]);
 
   const handleDrag = (type: 'start' | 'end') => {
     const container = waveformContainerRef.current;
@@ -104,10 +100,12 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
         const newStart = Math.min(pos, endPos - 0.01);
         setStartPos(newStart);
         setStartTime(newStart * duration);
+        console.log('Start set to:', newStart * duration); // Debug
       } else {
         const newEnd = Math.max(pos, startPos + 0.01);
         setEndPos(newEnd);
         setEndTime(newEnd * duration);
+        console.log('End set to:', newEnd * duration); // Debug
       }
     };
 

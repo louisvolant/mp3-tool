@@ -108,12 +108,12 @@ const saveFile = async () => {
       const mp3buf = numChannels === 1
         ? mp3Encoder.encodeBuffer(leftChunk)
         : mp3Encoder.encodeBuffer(leftChunk, rightChunk);
-      console.log('MP3 buffer length:', mp3buf.length);
-      if (mp3buf.length > 0) mp3Data.push(mp3buf);
+      console.log('MP3 buffer length:', mp3buf.byteLength); // Changed from .length to .byteLength
+      if (mp3buf.byteLength > 0) mp3Data.push(mp3buf);     // Changed from .length to .byteLength
     }
 
     const ending = mp3Encoder.flush();
-    if (ending.length > 0) mp3Data.push(ending);
+    if (ending.byteLength > 0) mp3Data.push(ending);
 
     const blob = new Blob(mp3Data, { type: 'audio/mpeg' });
     const url = URL.createObjectURL(blob);
@@ -220,8 +220,6 @@ useEffect(() => {
     )}
       <WaveformDisplay
         audioFile={audioFile}
-        waveform={waveform}
-        setWaveform={setWaveform}
         setDuration={setDuration}
         setShowTimingMarkers={setShowTimingMarkers}
         setStartTime={setStartTime}

@@ -78,29 +78,38 @@ export const applyFade = async (buffer: AudioBuffer, isFadeIn: boolean, duration
   };
 
 export const trimAudio = (buffer: AudioBuffer, start: number, end: number) => {
-    const startSample = Math.floor(start * buffer.sampleRate);
-    const endSample = Math.floor(end * buffer.sampleRate);
-    const frameCount = endSample - startSample;
+  const clampedStart = Math.max(0, Math.min(start, buffer.duration));
+  const clampedEnd = Math.max(clampedStart, Math.min(end, buffer.duration));
+  const startSample = Math.floor(clampedStart * buffer.sampleRate);
+  const endSample = Math.floor(clampedEnd * buffer.sampleRate);
+  const frameCount = endSample - startSample;
 
-    const offlineCtx = new OfflineAudioContext(
-      buffer.numberOfChannels,
-      frameCount,
-      buffer.sampleRate
-    );
+  console.log('Trimming - start:', clampedStart, 'end:', clampedEnd, 'frameCount:', frameCount);
 
-    const newBuffer = offlineCtx.createBuffer(
-      buffer.numberOfChannels,
-      frameCount,
-      buffer.sampleRate
-    );
+  if (frameCount <= 0) {
+    console.warn('Invalid trim range, returning original buffer');
+    return buffer; // Return original if no valid trim range
+  }
 
-    for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
-      const oldData = buffer.getChannelData(channel);
-      const newData = newBuffer.getChannelData(channel);
-      for (let i = 0; i < frameCount; i++) {
-        newData[i] = oldData[startSample + i];
-      }
+  const offlineCtx = new OfflineAudioContext(
+    buffer.numberOfChannels,
+    frameCount,
+    buffer.sampleRate
+  );
+
+  const newBuffer = offlineCtx.createBuffer(
+    buffer.numberOfChannels,
+    frameCount,
+    buffer.sampleRate
+  );
+
+  for (let channel = 0; channel < buffer.numberOfChannels; channel++) {
+    const oldData = buffer.getChannelData(channel);
+    const newData = newBuffer.getChannelData(channel);
+    for (let i = 0; i < frameCount; i++) {
+      newData[i] = oldData[startSample + i];
     }
+  }
 
-    return newBuffer;
-  };
+  return newBuffer;
+};
