@@ -2,10 +2,12 @@
 
   // Audio processing functions
 export const processAudio = async (
-  processType: string,
   audioFile: File,
+  makeTrim: boolean,
   volume: number,
+  makeFadeIn: boolean,
   fadeInDuration: number,
+  makeFadeOut: boolean,
   fadeOutDuration: number,
   startTime: number,
   endTime: number
@@ -21,13 +23,15 @@ export const processAudio = async (
     processedBuffer = await applyVolume(audioBuffer, volume);
   }
 
-  if (processType === 'fadeIn' && fadeInDuration > 0) {
+  if (makeFadeIn === true && fadeInDuration > 0) {
     processedBuffer = await applyFade(processedBuffer, true, fadeInDuration);
-  } else if (processType === 'fadeOut' && fadeOutDuration > 0) {
+  }
+
+  if (makeFadeOut === false && fadeOutDuration > 0) {
     processedBuffer = await applyFade(processedBuffer, false, fadeOutDuration);
   }
 
-  if (processType === 'trim' && startTime !== endTime) {
+  if (makeTrim === true && startTime !== endTime) {
     processedBuffer = trimAudio(processedBuffer, startTime, endTime);
   }
 

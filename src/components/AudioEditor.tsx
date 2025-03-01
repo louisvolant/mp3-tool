@@ -72,10 +72,12 @@ const saveFile = async () => {
   try {
     if (!audioFile) throw new Error('No audio file');
     const processedBuffer = await processAudio(
-      'trim',
       audioFile,
+      true,
       volume,
+      false,
       fadeInDuration,
+      false,
       fadeOutDuration,
       startTime,
       endTime
@@ -149,10 +151,12 @@ const resetEditor = () => {
 
 const previewFade = async (type: 'fadeIn' | 'fadeOut') => {
   const processedBuffer = await processAudio(
-    type,
     audioFile!,
+    false,
     volume,
+    type === 'fadeIn',
     fadeInDuration,
+    type === 'fadeOut',
     fadeOutDuration,
     startTime,
     endTime
@@ -247,10 +251,12 @@ useEffect(() => {
                   onClick={async () => {
                     if (Math.abs(startTime - endTime) > 0.001 && audioFile) {
                       const processedBuffer = await processAudio(
-                        'trim',
                         audioFile,
+                        true,
                         volume,
+                        false,
                         fadeInDuration,
+                        false,
                         fadeOutDuration,
                         startTime,
                         endTime
