@@ -157,12 +157,12 @@ const previewFade = async (type: 'fadeIn' | 'fadeOut') => {
     startTime,
     endTime
   );
-    if (processedBuffer && waveform) {
-      const blob = new Blob([bufferToWav(processedBuffer)], { type: 'audio/wav' });
-      const url = URL.createObjectURL(blob);
-      waveform.load(url);
-    }
-  };
+  if (processedBuffer && waveform) {
+    const blob = new Blob([bufferToWav(processedBuffer)], { type: 'audio/wav' });
+    const url = URL.createObjectURL(blob);
+    waveform.load(url);
+  }
+};
 
 
     const handlePlayPause = () => {
@@ -175,10 +175,10 @@ const previewFade = async (type: 'fadeIn' | 'fadeOut') => {
     };
 
     const handleStop = () => {
-      if (isPlaying) {
-        waveform?.stop();
+      if (waveform) {
+        waveform.stop();
+        setIsPlaying(false);
       }
-      setIsPlaying(false);
     };
 
 useEffect(() => {
@@ -215,11 +215,13 @@ useEffect(() => {
           </label>
         </div>
       )}
-    {audioFile && (
-      <div className="text-center mb-2">{audioFile.name}</div> // Add filename
-    )}
+      {audioFile && (
+        <div className="text-center mb-2">{audioFile.name}</div>
+      )}
       <WaveformDisplay
         audioFile={audioFile}
+        //waveform={waveform} // Add back waveform
+        setWaveform={setWaveform}
         setDuration={setDuration}
         setShowTimingMarkers={setShowTimingMarkers}
         setStartTime={setStartTime}
@@ -227,6 +229,8 @@ useEffect(() => {
         currentTime={currentTime}
         setCurrentTime={setCurrentTime}
         duration={duration}
+        startTime={startTime}
+        endTime={endTime}
         showTimingMarkers={showTimingMarkers}
         clearRegions={clearRegionsRef}
       />

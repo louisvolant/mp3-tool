@@ -4,6 +4,7 @@ import WaveSurfer from 'wavesurfer.js';
 
 interface WaveformDisplayProps {
   audioFile: File | null;
+  setWaveform: (waveform: WaveSurfer | null) => void;
   setDuration: (duration: number) => void;
   setShowTimingMarkers: (show: boolean) => void;
   setStartTime: (time: number) => void;
@@ -11,12 +12,15 @@ interface WaveformDisplayProps {
   currentTime: number;
   setCurrentTime: (time: number) => void;
   duration: number;
+  startTime: number;
+  endTime: number;
   showTimingMarkers: boolean;
   clearRegions: React.MutableRefObject<() => void>;
 }
 
 export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   audioFile,
+  setWaveform,
   setDuration,
   setShowTimingMarkers,
   setStartTime,
@@ -24,6 +28,8 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   currentTime,
   setCurrentTime,
   duration,
+  startTime,
+  endTime,
   showTimingMarkers,
   clearRegions,
 }) => {
@@ -57,6 +63,7 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
       setDuration(wavesurfer.getDuration());
       setShowTimingMarkers(true);
       setEndPos(1);
+      console.log('Waveform set:', wavesurfer);
     });
 
     wavesurfer.on('timeupdate', (time) => {
@@ -68,6 +75,7 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
     });
 
     wavesurferRef.current = wavesurfer;
+    setWaveform(wavesurfer);
 
     clearRegions.current = () => {
       setStartPos(0);
@@ -85,8 +93,18 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
     return () => {
       wavesurfer.destroy();
       wavesurferRef.current = null;
+      setWaveform(null);
     };
-  }, [audioFile, setDuration, setShowTimingMarkers, setCurrentTime, clearRegions, setStartTime, setEndTime]);
+  }, [
+    audioFile,
+    setDuration,
+    setShowTimingMarkers,
+    setCurrentTime,
+    clearRegions,
+    setStartTime,
+    setEndTime,
+    setWaveform,
+  ]);
 
   const handleDrag = (type: 'start' | 'end') => {
     const container = waveformContainerRef.current;
@@ -100,12 +118,12 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
         const newStart = Math.min(pos, endPos - 0.01);
         setStartPos(newStart);
         setStartTime(newStart * duration);
-        console.log('Start set to:', newStart * duration); // Debug
+        console.log('Start set to:', newStart * duration);
       } else {
         const newEnd = Math.max(pos, startPos + 0.01);
         setEndPos(newEnd);
         setEndTime(newEnd * duration);
-        console.log('End set to:', newEnd * duration); // Debug
+        console.log('End set to:', newEnd * duration);
       }
     };
 
@@ -124,48 +142,44 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-return (
-  <div className="relative w-full">
-    <div ref={waveformContainerRef} className="mb-4 h-24 bg-gray-50 rounded-lg relative">
-      {audioFile && (
-        <>
-          {/* Start Control Bar */}
-          <div
-            className="absolute top-0 bottom-0 w-2 bg-green-500 cursor-ew-resize flex items-center justify-center z-10 rounded-md shadow-md hover:bg-green-600 transition-colors"
-            style={{ left: `${startPos * 100}%` }}
-            onMouseDown={() => handleDrag('start')}
-          >
-            <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
-          </div>
-          {/* End Control Bar */}
-          <div
-            className="absolute top-0 bottom-0 w-2 bg-red-500 cursor-ew-resize flex items-center justify-center z-10 rounded-md shadow-md hover:bg-red-600 transition-colors"
-            style={{ left: `${endPos * 100}%` }}
-            onMouseDown={() => handleDrag('end')}
-          >
-            <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
-          </div>
-          {/* Progress Bar */}
-          <div
-            className="absolute top-0 bottom-0 bg-blue-300 opacity-50 z-5 rounded-md"
-            style={{
-              left: `${startPos * 100}%`,
-              width: `${(endPos - startPos) * 100}%`,
-            }}
-          />
-        </>
+  return (
+    <div className="relative w-full">
+      <div ref={waveformContainerRef} className="mb-4 h-24 bg-gray-50 rounded-lg relative">
+        {audioFile && (
+          <>
+            <div
+              className="absolute top-0 bottom-0 w-2 bg-green-500 cursor-ew-resize flex items-center justify-center z-10 rounded-md shadow-md hover:bg-green-600 transition-colors"
+              style={{ left: `${startPos * 100}%` }}
+              onMouseDown={() => handleDrag('start')}
+            >
+              <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
+            </div>
+            <div
+              className="absolute top-0 bottom-0 w-2 bg-red-500 cursor-ew-resize flex items-center justify-center z-10 rounded-md shadow-md hover:bg-red-600 transition-colors"
+              style={{ left: `${endPos * 100}%` }}
+              onMouseDown={() => handleDrag('end')}
+            >
+              <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
+            </div>
+            <div
+              className="absolute top-0 bottom-0 bg-blue-300 opacity-50 z-5 rounded-md"
+              style={{
+                left: `${startPos * 100}%`,
+                width: `${(endPos - startPos) * 100}%`,
+              }}
+            />
+          </>
+        )}
+      </div>
+      {showTimingMarkers && (
+        <div className="flex justify-between mt-1 text-sm text-gray-600">
+          <div>{formatTime(startTime)}</div>
+          <div>{formatTime(currentTime)}</div>
+          <div>{formatTime(endTime)}</div>
+        </div>
       )}
     </div>
-    {showTimingMarkers && (
-      <div className="flex justify-between mt-1 text-sm text-gray-600">
-        <div>{formatTime(0)}</div>
-        <div>{formatTime(currentTime)}</div>
-        <div>{formatTime(duration)}</div>
-      </div>
-    )}
-  </div>
-);
+  );
 };
 
 export default WaveformDisplay;
-
