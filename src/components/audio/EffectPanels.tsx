@@ -25,17 +25,25 @@ export const EffectPanels: React.FC<EffectPanelsProps> = ({
 }) => {
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <label>Volume:</label>
+      <div className="flex flex-col items-center">
         <input
           type="range"
           min="-100"
-          max="100"
+          max="200"
+          step="50"
           value={volume}
           onChange={(e) => onVolumeChange(parseInt(e.target.value))}
-          className="w-64"
+          className="w-64 appearance-none bg-gray-200 h-2 rounded-full"
         />
-        <span>{volume}%</span>
+        <div className="w-64 flex justify-between mt-2">
+          <span>-100%</span>
+          <span>0%</span>
+          <span>100%</span>
+          <span>200%</span>
+        </div>
+        <div className="mt-2">
+          <span>Volume: {volume}%</span>
+        </div>
       </div>
       <div className="flex gap-4">
         <div className="flex gap-2 items-center">
