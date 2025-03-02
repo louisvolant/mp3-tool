@@ -129,13 +129,13 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
         setStartPos(newStart);
         setStartTime(newStart * duration);
         setIsTrimmed?.(newStart !== initialStartPos || endPos !== initialEndPos);
-        console.log('Start set to:', newStart * duration);
+        console.log('Start set to:', (newStart * duration).toFixed(2));
       } else {
         const newEnd = Math.max(pos, startPos + 0.01);
         setEndPos(newEnd);
         setEndTime(newEnd * duration);
         setIsTrimmed?.(startPos !== initialStartPos || newEnd !== initialEndPos);
-        console.log('End set to:', newEnd * duration);
+        console.log('End set to:', (newEnd * duration).toFixed(2));
       }
     };
 

@@ -28,11 +28,11 @@ export const processAudio = async (
   }
 
   if (makeFadeIn === true && fadeInDuration > 0) {
-    processedBuffer = await applyFade(processedBuffer, true, fadeInDuration);
+    processedBuffer = await applyFade(processedBuffer, true, false, fadeInDuration);
   }
 
   if (makeFadeOut === true && fadeOutDuration > 0) {
-    processedBuffer = await applyFade(processedBuffer, false, fadeOutDuration);
+    processedBuffer = await applyFade(processedBuffer, false, true, fadeOutDuration);
   }
 
   return processedBuffer;
@@ -56,7 +56,7 @@ export const applyVolume = async (buffer: AudioBuffer, volumePercentage: number)
     return await offlineCtx.startRendering();
   };
 
-export const applyFade = async (buffer: AudioBuffer, isFadeIn: boolean, duration: number) => {
+export const applyFade = async (buffer: AudioBuffer, isFadeIn: boolean, isFadeOut: boolean, duration: number) => {
     const offlineCtx = new OfflineAudioContext({
       numberOfChannels: buffer.numberOfChannels,
       length: buffer.length,
@@ -70,9 +70,10 @@ export const applyFade = async (buffer: AudioBuffer, isFadeIn: boolean, duration
     if (isFadeIn) {
       gain.gain.setValueAtTime(0, 0);
       gain.gain.linearRampToValueAtTime(1, duration);
-    } else {
-      gain.gain.setValueAtTime(1, 0);
-      gain.gain.linearRampToValueAtTime(0, buffer.duration - duration);
+    }
+    if (isFadeOut) {
+      gain.gain.setValueAtTime(1, buffer.duration - duration);
+      gain.gain.linearRampToValueAtTime(0, buffer.duration);
     }
 
     source.connect(gain);

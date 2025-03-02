@@ -196,7 +196,7 @@ const AudioEditor = () => {
   };
 
   useEffect(() => {
-    console.log('AudioEditor - startTime:', startTime, 'endTime:', endTime);
+    console.log('AudioEditor - startTime:', startTime.toFixed(2), 'endTime:', endTime.toFixed(2));
   }, [startTime, endTime]);
 
   return (

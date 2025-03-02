@@ -44,7 +44,7 @@ export const EffectPanels: React.FC<EffectPanelsProps> = ({
             onChange={(e) => onFadeInChange(Number(e.target.value))}
             className="px-2 py-1 border rounded"
           >
-            {[0, 1, 2, 3].map((t) => (
+            {[0, 1, 2, 3, 4, 5].map((t) => (
               <option key={t} value={t}>
                 {t}s
               </option>
@@ -58,7 +58,7 @@ export const EffectPanels: React.FC<EffectPanelsProps> = ({
             onChange={(e) => onFadeOutChange(Number(e.target.value))}
             className="px-2 py-1 border rounded"
           >
-            {[0, 1, 2, 3].map((t) => (
+            {[0, 1, 2, 3, 4, 5].map((t) => (
               <option key={t} value={t}>
                 {t}s
               </option>
