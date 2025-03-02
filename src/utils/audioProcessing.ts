@@ -1,9 +1,9 @@
 // src/utils/audioProcessing.ts
 
-  // Audio processing functions
 export const processAudio = async (
   audioFile: File,
   makeTrim: boolean,
+  makeVolumeChange: boolean,
   volume: number,
   makeFadeIn: boolean,
   fadeInDuration: number,
@@ -19,7 +19,11 @@ export const processAudio = async (
   const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
   let processedBuffer = audioBuffer;
 
-  if (volume !== 0) {
+  if (makeTrim === true && startTime !== endTime) {
+    processedBuffer = trimAudio(processedBuffer, startTime, endTime);
+  }
+
+  if (makeVolumeChange === true && volume !== 0) {
     processedBuffer = await applyVolume(audioBuffer, volume);
   }
 
@@ -27,12 +31,8 @@ export const processAudio = async (
     processedBuffer = await applyFade(processedBuffer, true, fadeInDuration);
   }
 
-  if (makeFadeOut === false && fadeOutDuration > 0) {
+  if (makeFadeOut === true && fadeOutDuration > 0) {
     processedBuffer = await applyFade(processedBuffer, false, fadeOutDuration);
-  }
-
-  if (makeTrim === true && startTime !== endTime) {
-    processedBuffer = trimAudio(processedBuffer, startTime, endTime);
   }
 
   return processedBuffer;

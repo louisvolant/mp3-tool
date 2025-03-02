@@ -1,4 +1,5 @@
 // src/components/audio/WaveformDisplay.tsx
+
 import React, { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 
@@ -16,6 +17,8 @@ interface WaveformDisplayProps {
   endTime: number;
   showTimingMarkers: boolean;
   clearRegions: React.MutableRefObject<() => void>;
+  // New prop to expose trim change status
+  setIsTrimmed?: (isTrimmed: boolean) => void;
 }
 
 export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
@@ -32,11 +35,14 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   endTime,
   showTimingMarkers,
   clearRegions,
+  setIsTrimmed,
 }) => {
   const waveformContainerRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const [startPos, setStartPos] = useState(0);
   const [endPos, setEndPos] = useState(1);
+  const [initialStartPos] = useState(0); // Initial start position
+  const [initialEndPos] = useState(1);   // Initial end position
 
   useEffect(() => {
     if (!waveformContainerRef.current) return;
@@ -60,9 +66,11 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
 
     wavesurfer.on('ready', () => {
       console.log('WaveSurfer ready');
-      setDuration(wavesurfer.getDuration());
+      const dur = wavesurfer.getDuration();
+      setDuration(dur);
       setShowTimingMarkers(true);
       setEndPos(1);
+      setEndTime(dur);
       console.log('Waveform set:', wavesurfer);
     });
 
@@ -82,6 +90,7 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
       setEndPos(1);
       setStartTime(0);
       setEndTime(wavesurfer.getDuration() || 0);
+      setIsTrimmed?.(false); // Reset trim status
     };
 
     if (audioFile) {
@@ -104,6 +113,7 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
     setStartTime,
     setEndTime,
     setWaveform,
+    setIsTrimmed,
   ]);
 
   const handleDrag = (type: 'start' | 'end') => {
@@ -118,11 +128,13 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
         const newStart = Math.min(pos, endPos - 0.01);
         setStartPos(newStart);
         setStartTime(newStart * duration);
+        setIsTrimmed?.(newStart !== initialStartPos || endPos !== initialEndPos);
         console.log('Start set to:', newStart * duration);
       } else {
         const newEnd = Math.max(pos, startPos + 0.01);
         setEndPos(newEnd);
         setEndTime(newEnd * duration);
+        setIsTrimmed?.(startPos !== initialStartPos || newEnd !== initialEndPos);
         console.log('End set to:', newEnd * duration);
       }
     };
