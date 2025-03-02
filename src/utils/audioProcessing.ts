@@ -24,7 +24,7 @@ export const processAudio = async (
   }
 
   if (makeVolumeChange === true && volume !== 0) {
-    processedBuffer = await applyVolume(audioBuffer, volume);
+    processedBuffer = await applyVolume(processedBuffer, volume);
   }
 
   if (makeFadeIn === true && fadeInDuration > 0) {
@@ -54,7 +54,7 @@ export const applyVolume = async (buffer: AudioBuffer, volumePercentage: number)
     gainNode.connect(offlineCtx.destination);
     source.start();
     return await offlineCtx.startRendering();
-  };
+};
 
 export const applyFade = async (buffer: AudioBuffer, isFadeIn: boolean, isFadeOut: boolean, duration: number) => {
     const offlineCtx = new OfflineAudioContext({
