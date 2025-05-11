@@ -210,27 +210,33 @@ const AudioEditor = () => {
         )}
       </div>
 
-      {!audioFile && (
-        <div
-          className="border-2 border-dashed p-8 mb-4 text-center"
-          onDrop={handleFileUpload}
-          onDragOver={(e) => e.preventDefault()}
-        >
-          <input
-            type="file"
-            accept="audio/mpeg"
-            onChange={handleFileUpload}
-            className="hidden"
-            id="audio-upload"
-          />
-          <label htmlFor="audio-upload" className="cursor-pointer">
-            Drag & drop an MP3 file here or click to browse
-          </label>
-        </div>
-      )}
-      {audioFile && (
-        <div className="text-center mb-2">{audioFile.name}</div>
-      )}
+    {/* Drag & Drop Area */}
+    { !audioFile && (
+      <div
+        className="border-2 border-dashed p-8 mb-4 text-center"
+        onDrop={handleFileUpload}
+        onDragOver={(e) => e.preventDefault()}
+      >
+        <input
+          type="file"
+          accept="audio/mpeg"
+          onChange={handleFileUpload}
+          className="hidden"
+          id="audio-upload"
+        />
+        <label htmlFor="audio-upload" className="cursor-pointer">
+          Drag & drop an MP3 file here or click to browse
+        </label>
+      </div>
+    )}
+
+    {/* Display the audio file name if exists */}
+    { audioFile && (
+      <div className="text-center mb-2">{audioFile.name}</div>
+    )}
+
+    {/* Only render the WaveformDisplay if an audio file is present */}
+    { audioFile && (
       <WaveformDisplay
         audioFile={audioFile}
         setWaveform={setWaveform}
@@ -245,8 +251,9 @@ const AudioEditor = () => {
         endTime={endTime}
         showTimingMarkers={showTimingMarkers}
         clearRegions={clearRegionsRef}
-        setIsTrimmed={setIsTrimmed} // Pass the setter
+        setIsTrimmed={setIsTrimmed}
       />
+    )}
 
       {audioFile && (
         <div className="space-y-4">
