@@ -17,8 +17,8 @@ interface WaveformDisplayProps {
   endTime: number;
   showTimingMarkers: boolean;
   clearRegions: React.MutableRefObject<() => void>;
-  // New prop to expose trim change status
   setIsTrimmed?: (isTrimmed: boolean) => void;
+  theme: string;
 }
 
 export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
@@ -36,6 +36,7 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   showTimingMarkers,
   clearRegions,
   setIsTrimmed,
+  theme
 }) => {
   const waveformContainerRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
@@ -105,16 +106,16 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
       setWaveform(null);
     };
   }, [
-    audioFile,
-    setDuration,
-    setShowTimingMarkers,
-    setCurrentTime,
-    clearRegions,
-    setStartTime,
-    setEndTime,
-    setWaveform,
-    setIsTrimmed,
-  ]);
+      audioFile,
+      setDuration,
+      setShowTimingMarkers,
+      setCurrentTime,
+      clearRegions,
+      setStartTime,
+      setEndTime,
+      setWaveform,
+      setIsTrimmed,
+      ]);
 
   const handleDrag = (type: 'start' | 'end') => {
     const container = waveformContainerRef.current;
@@ -154,47 +155,47 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-    return (
-      <div className="relative w-full bg-gray-50">
-        <div
-          ref={waveformContainerRef}
-          className="h-24 relative overflow-hidden mb-4 rounded-lg"
-        >
-          {audioFile && (
-            <>
-              <div
-                className="absolute top-0 bottom-0 w-2 bg-green-500 cursor-ew-resize flex items-center justify-center z-10"
-                style={{ left: `${startPos * 100}%` }}
-                onMouseDown={() => handleDrag("start")}
-              >
-                <div className="w-4 h-full absolute" style={{ left: "-8px" }} />
-              </div>
-              <div
-                className="absolute top-0 bottom-0 w-2 bg-red-500 cursor-ew-resize flex items-center justify-center z-10"
-                style={{ left: `${endPos * 100}%` }}
-                onMouseDown={() => handleDrag("end")}
-              >
-                <div className="w-4 h-full absolute" style={{ left: "-8px" }} />
-              </div>
-              <div
-                className="absolute top-0 bottom-0 bg-blue-300 opacity-50 z-5 rounded-md"
-                style={{
-                  left: `${startPos * 100}%`,
-                  width: `${(endPos - startPos) * 100}%`,
-                }}
-              />
-            </>
-          )}
-        </div>
-        {showTimingMarkers && (
-          <div className="flex justify-between mt-1 text-sm text-gray-600">
-            <div>{formatTime(startTime)}</div>
-            <div>{formatTime(currentTime)}</div>
-            <div>{formatTime(endTime)}</div>
-          </div>
+  return (
+    <div className="relative w-full">
+      <div
+        ref={waveformContainerRef}
+        className={`h-24 relative mb-4 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}
+      >
+        {audioFile && (
+          <>
+            <div
+              className="absolute top-0 bottom-0 w-2 bg-green-500 cursor-ew-resize flex items-center justify-center z-10"
+              style={{ left: `${startPos * 100}%` }}
+              onMouseDown={() => handleDrag('start')}
+            >
+              <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
+            </div>
+            <div
+              className="absolute top-0 bottom-0 w-2 bg-red-500 cursor-ew-resize flex items-center justify-center z-10"
+              style={{ left: `${endPos * 100}%` }}
+              onMouseDown={() => handleDrag('end')}
+            >
+              <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
+            </div>
+            <div
+              className="absolute top-0 bottom-0 bg-blue-300 opacity-50 z-5 rounded-md"
+              style={{
+                left: `${startPos * 100}%`,
+                width: `${(endPos - startPos) * 100}%`,
+              }}
+            />
+          </>
         )}
       </div>
-    );
+      {showTimingMarkers && (
+        <div className={`flex justify-between mt-1 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+          <div>{formatTime(startTime)}</div>
+          <div>{formatTime(currentTime)}</div>
+          <div>{formatTime(endTime)}</div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default WaveformDisplay;

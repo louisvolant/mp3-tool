@@ -9,7 +9,11 @@ import { ExportPanels } from './audio/ExportPanels';
 import { WaveformDisplay } from './audio/WaveformDisplay';
 import { EffectPanels } from './audio/EffectPanels';
 
-const AudioEditor = () => {
+interface AudioEditorProps {
+  theme: string;
+}
+
+const AudioEditor: React.FC<AudioEditorProps> = ({ theme }) => {
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [waveform, setWaveform] = useState<WaveSurfer | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -153,7 +157,7 @@ const AudioEditor = () => {
     setStartTime(0);
     setEndTime(0);
     setShowTimingMarkers(false);
-    setIsTrimmed(false); // Reset trim status
+    setIsTrimmed(false);
     waveform?.destroy();
     setWaveform(null);
     clearRegionsRef.current();
@@ -238,6 +242,7 @@ const AudioEditor = () => {
     {/* Only render the WaveformDisplay if an audio file is present */}
     { audioFile && (
       <WaveformDisplay
+        theme={theme}
         audioFile={audioFile}
         setWaveform={setWaveform}
         setDuration={setDuration}
