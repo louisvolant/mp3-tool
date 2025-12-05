@@ -12,8 +12,8 @@
     "jsqr": "^1.4.0",
     "next": "^15.1.7",
     "qrcode.react": "^4.2.0",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "wavesurfer.js": "^7.9.1"
   },
   "devDependencies": {
