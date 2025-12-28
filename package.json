@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "jsqr": "^1.4.0",
-    "next": "^15.5.7",
+    "next": "^15.5.9",
     "qrcode.react": "^4.2.0",
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "wavesurfer.js": "^7.9.1"
   },
   "devDependencies": {
