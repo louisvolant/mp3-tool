@@ -38,29 +38,22 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   setIsTrimmed,
   theme
 }) => {
-  const waveformContainerRef = useRef<HTMLDivElement>(null);
+const waveformContainerRef = useRef<HTMLDivElement>(null);
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const [startPos, setStartPos] = useState(0);
   const [endPos, setEndPos] = useState(1);
 
-  // Helper to get CSS variable values from the DOM
   const getCssVar = (name: string) => {
     if (typeof window === 'undefined') return '';
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   };
 
-  // Effect to handle WaveSurfer initialization
   useEffect(() => {
     if (!waveformContainerRef.current) return;
 
-    if (wavesurferRef.current) {
-      wavesurferRef.current.destroy();
-      wavesurferRef.current = null;
-    }
-
+    // Create the instance
     const wavesurfer = WaveSurfer.create({
       container: waveformContainerRef.current,
-      // Read colors from Tailwind 4 CSS variables
       waveColor: getCssVar('--waveform-wave') || '#A8DBA8',
       progressColor: getCssVar('--waveform-progress') || '#3B8686',
       cursorColor: getCssVar('--waveform-cursor') || '#0B0C0C',
@@ -71,49 +64,62 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
       fillParent: true,
     });
 
-    wavesurfer.on('ready', () => {
-      console.log('WaveSurfer ready');
+    wavesurferRef.current = wavesurfer;
+    setWaveform(wavesurfer);
+
+    // Event listeners
+    const onReady = () => {
       const dur = wavesurfer.getDuration();
       setDuration(dur);
       setShowTimingMarkers(true);
       setEndPos(1);
       setEndTime(dur);
-      console.log('Waveform set:', wavesurfer);
-    });
+    };
 
-    wavesurfer.on('timeupdate', (time) => {
-        setCurrentTime(time)
-    });
+    const onTimeUpdate = (time: number) => setCurrentTime(time);
 
-    wavesurfer.on('error', (error) => {
-      console.error('WaveSurfer error:', error);
-    });
-
-    wavesurferRef.current = wavesurfer;
-    setWaveform(wavesurfer);
+    wavesurfer.on('ready', onReady);
+    wavesurfer.on('timeupdate', onTimeUpdate);
 
     clearRegions.current = () => {
       setStartPos(0);
       setEndPos(1);
       setStartTime(0);
-      setEndTime(wavesurfer.getDuration() || 0);
+      if (wavesurferRef.current) {
+        setEndTime(wavesurferRef.current.getDuration() || 0);
+      }
       setIsTrimmed?.(false);
     };
 
     if (audioFile) {
       const url = URL.createObjectURL(audioFile);
-      wavesurfer.load(url);
-      return () => URL.revokeObjectURL(url);
+      // We use a promise check or catch to ignore the AbortError during cleanup
+      wavesurfer.load(url).catch((err) => {
+        if (err.name === 'AbortError') {
+          console.log('Fetch aborted safely during component unmount');
+        } else {
+          console.error('WaveSurfer error:', err);
+        }
+      });
+
+      return () => {
+        URL.revokeObjectURL(url);
+        // Important: Remove listeners before destroying
+        wavesurfer.un('ready', onReady);
+        wavesurfer.un('timeupdate', onTimeUpdate);
+        wavesurfer.destroy();
+        wavesurferRef.current = null;
+        setWaveform(null);
+      };
     }
 
     return () => {
       wavesurfer.destroy();
       wavesurferRef.current = null;
-      setWaveform(null);
     };
   }, [audioFile, setDuration, setShowTimingMarkers, setCurrentTime, clearRegions, setStartTime, setEndTime, setWaveform, setIsTrimmed]);
 
-  // Dynamic Theme Update: Updates WaveSurfer colors without re-mounting
+  // Dynamic Theme Update
   useEffect(() => {
     if (wavesurferRef.current) {
       wavesurferRef.current.setOptions({
@@ -122,7 +128,7 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
         cursorColor: getCssVar('--waveform-cursor'),
       });
     }
-  }, [theme]); // Triggered whenever theme toggles
+  }, [theme]);
 
   const handleDrag = (type: 'start' | 'end') => {
     const container = waveformContainerRef.current;

@@ -15,6 +15,10 @@
   --waveform-cursor: #6b7280; /* gray-500 */
 }
 
+html, body {
+  height: 100%;
+}
+
 :root {
   --waveform-bg: var(--waveform-bg-light);
   --background: #ffffff;
