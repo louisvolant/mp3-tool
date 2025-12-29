@@ -38,8 +38,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300`}>
+    <html lang="en" className="h-full">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-full flex flex-col transition-colors duration-300`}>
         <header className="bg-blue-600 dark:bg-blue-800 text-white py-4 shadow-lg">
           <div className="container mx-auto px-4 flex items-center">
             <Image
@@ -53,7 +53,11 @@ export default function RootLayout({
             <h1 className="text-2xl font-bold">MP3 Tool</h1>
           </div>
         </header>
-        <main>{children}</main>
+
+        <main className="flex-grow">
+          {children}
+        </main>
+
         <Footer />
       </body>
     </html>
