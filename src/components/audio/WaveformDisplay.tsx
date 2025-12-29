@@ -178,22 +178,29 @@ const handleDrag = (type: 'start' | 'end') => {
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  return (
+    return (
     <div className="relative w-full">
       <div
         ref={waveformContainerRef}
-        /* Using Tailwind 4 variables for the background */
-        className="h-24 relative mb-4 rounded-lg bg-[var(--waveform-bg)] transition-colors duration-300"
+        className="h-24 relative mb-4 rounded-lg bg-[var(--waveform-bg)] transition-all duration-300 ring-1 ring-gray-200 dark:ring-gray-700 shadow-inner overflow-hidden"
       >
         {audioFile && (
           <>
+            <div
+              className="absolute top-0 bottom-0 bg-blue-500/20 backdrop-blur-[1px] z-5 transition-all"
+              style={{
+                left: `${startPos * 100}%`,
+                width: `${(endPos - startPos) * 100}%`,
+              }}
+            />
+
             {/* Start Marker */}
             <div
               className="absolute top-0 bottom-0 w-1 bg-green-500 cursor-ew-resize z-10 shadow-[0_0_10px_rgba(34,197,94,0.5)]"
               style={{ left: `${startPos * 100}%` }}
               onMouseDown={() => handleDrag('start')}
             >
-              <div className="absolute -top-1 -left-1 w-3 h-3 bg-green-500 rounded-full" />
+              <div className="absolute -top-1 -left-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900" />
             </div>
 
             {/* End Marker */}
@@ -202,26 +209,28 @@ const handleDrag = (type: 'start' | 'end') => {
               style={{ left: `${endPos * 100}%` }}
               onMouseDown={() => handleDrag('end')}
             >
-              <div className="absolute -top-1 -left-1 w-3 h-3 bg-red-500 rounded-full" />
+              <div className="absolute -top-1 -left-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-900" />
             </div>
-
-            {/* Selection Overlay */}
-            <div
-              className="absolute top-0 bottom-0 bg-blue-500/20 mix-blend-multiply dark:mix-blend-screen z-5"
-              style={{
-                left: `${startPos * 100}%`,
-                width: `${(endPos - startPos) * 100}%`,
-              }}
-            />
           </>
         )}
       </div>
 
       {showTimingMarkers && (
         <div className="flex justify-between mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
-          <span>{formatTime(startTime)}</span>
-          <span className="text-blue-500 font-bold">{formatTime(currentTime)}</span>
-          <span>{formatTime(endTime)}</span>
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase opacity-50">Start</span>
+            <span>{formatTime(startTime)}</span>
+          </div>
+
+          <div className="flex flex-col items-center">
+            <span className="text-[10px] uppercase opacity-50">Current</span>
+            <span className="text-blue-500 font-bold">{formatTime(currentTime)}</span>
+          </div>
+
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] uppercase opacity-50">End</span>
+            <span>{formatTime(endTime)}</span>
+          </div>
         </div>
       )}
     </div>
