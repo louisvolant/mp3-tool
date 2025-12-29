@@ -27,8 +27,8 @@ export const metadata: Metadata = {
     images: ['/icon_music.png'],
   },
   icons: [
-    { rel: "icon", url: "/icon_music.svg" },
-    { rel: "apple-touch-icon", url: "/icon_music.svg" },
+    { rel: "icon", url: "/icon_music.png" },
+    { rel: "apple-touch-icon", url: "/icon_music.png" },
   ],
 };
 
