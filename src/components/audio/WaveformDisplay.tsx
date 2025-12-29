@@ -43,6 +43,10 @@ const waveformContainerRef = useRef<HTMLDivElement>(null);
   const [startPos, setStartPos] = useState(0);
   const [endPos, setEndPos] = useState(1);
 
+  // Constants for original positions
+  const INITIAL_START_POS = 0;
+  const INITIAL_END_POS = 1;
+
   const getCssVar = (name: string) => {
     if (typeof window === 'undefined') return '';
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -130,26 +134,32 @@ const waveformContainerRef = useRef<HTMLDivElement>(null);
     }
   }, [theme]);
 
-  const handleDrag = (type: 'start' | 'end') => {
+const handleDrag = (type: 'start' | 'end') => {
     const container = waveformContainerRef.current;
     if (!container || !duration) return;
 
     const rect = container.getBoundingClientRect();
+
     const moveHandler = (moveEvent: MouseEvent) => {
       const x = Math.max(rect.left, Math.min(rect.right, moveEvent.clientX));
       const pos = (x - rect.left) / rect.width;
+
       if (type === 'start') {
         const newStart = Math.min(pos, endPos - 0.01);
         setStartPos(newStart);
         setStartTime(newStart * duration);
-        setIsTrimmed?.(newStart !== initialStartPos || endPos !== initialEndPos);
-        console.log('Start set to:', (newStart * duration).toFixed(2));
+
+        // English: Check if the markers moved from their initial full-track positions
+        const hasMoved = newStart !== INITIAL_START_POS || endPos !== INITIAL_END_POS;
+        setIsTrimmed?.(hasMoved);
       } else {
         const newEnd = Math.max(pos, startPos + 0.01);
         setEndPos(newEnd);
         setEndTime(newEnd * duration);
-        setIsTrimmed?.(startPos !== initialStartPos || newEnd !== initialEndPos);
-        console.log('End set to:', (newEnd * duration).toFixed(2));
+
+        // English: Check if the markers moved from their initial full-track positions
+        const hasMoved = startPos !== INITIAL_START_POS || newEnd !== INITIAL_END_POS;
+        setIsTrimmed?.(hasMoved);
       }
     };
 
