@@ -57,16 +57,16 @@ const waveformContainerRef = useRef<HTMLDivElement>(null);
 
     // Create the instance
     const wavesurfer = WaveSurfer.create({
-      container: waveformContainerRef.current,
-      waveColor: getCssVar('--waveform-wave') || '#A8DBA8',
-      progressColor: getCssVar('--waveform-progress') || '#3B8686',
-      cursorColor: getCssVar('--waveform-cursor') || '#0B0C0C',
-      barWidth: 2,
-      barRadius: 3,
-      cursorWidth: 1,
-      height: 100,
-      fillParent: true,
-    });
+        container: waveformContainerRef.current,
+        waveColor: getCssVar('--waveform-wave') || '#A8DBA8',
+        progressColor: getCssVar('--waveform-progress') || '#3B8686',
+        cursorColor: getCssVar('--waveform-cursor') || '#0B0C0C',
+        barWidth: 2,
+        barRadius: 3,
+        cursorWidth: 1,
+        height: 96,
+        fillParent: true,
+      });
 
     wavesurferRef.current = wavesurfer;
     setWaveform(wavesurfer);
@@ -178,59 +178,75 @@ const handleDrag = (type: 'start' | 'end') => {
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-    return (
-    <div className="relative w-full">
+  return (
+    <div className="relative w-full pt-4">
       <div
         ref={waveformContainerRef}
-        className="h-24 relative mb-4 rounded-lg bg-[var(--waveform-bg)] transition-all duration-300 ring-1 ring-gray-200 dark:ring-gray-700 shadow-inner overflow-hidden"
+        className="h-24 relative mb-4 rounded-lg bg-[var(--waveform-bg)] transition-all duration-300 ring-1 ring-gray-200 dark:ring-gray-700 shadow-inner"
       >
         {audioFile && (
           <>
+            {/* Selection Overlay */}
             <div
-              className="absolute top-0 bottom-0 bg-blue-500/20 backdrop-blur-[1px] z-5 transition-all"
+              className="absolute top-0 bottom-0 bg-blue-500/15 backdrop-blur-[1px] z-5 transition-all"
               style={{
                 left: `${startPos * 100}%`,
                 width: `${(endPos - startPos) * 100}%`,
               }}
             />
 
-            {/* Start Marker */}
             <div
-              className="absolute top-0 bottom-0 w-1 bg-green-500 cursor-ew-resize z-10 shadow-[0_0_10px_rgba(34,197,94,0.5)]"
-              style={{ left: `${startPos * 100}%` }}
+              className="absolute top-0 bottom-0 w-4 cursor-ew-resize z-20 flex justify-center group/start"
+              style={{ left: `calc(${startPos * 100}% - 8px)` }}
               onMouseDown={() => handleDrag('start')}
             >
-              <div className="absolute -top-1 -left-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-900" />
+              <div className="w-0.5 h-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)] group-hover/start:w-1 transition-all" />
+
+              <div className="absolute -top-2 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-900 shadow-md transform hover:scale-125 transition-transform" />
             </div>
 
-            {/* End Marker */}
+            {/* End Marker (Red) */}
             <div
-              className="absolute top-0 bottom-0 w-1 bg-red-500 cursor-ew-resize z-10 shadow-[0_0_10px_rgba(239,68,68,0.5)]"
-              style={{ left: `${endPos * 100}%` }}
+              className="absolute top-0 bottom-0 w-4 cursor-ew-resize z-20 flex justify-center group/end"
+              style={{ left: `calc(${endPos * 100}% - 8px)` }}
               onMouseDown={() => handleDrag('end')}
             >
-              <div className="absolute -top-1 -left-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white dark:border-gray-900" />
+              {/* The actual visual line */}
+              <div className="w-0.5 h-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.6)] group-hover/end:w-1 transition-all" />
+
+              {/* The handle dot */}
+              <div className="absolute -top-2 w-4 h-4 bg-red-500 rounded-full border-2 border-white dark:border-gray-900 shadow-md transform hover:scale-125 transition-transform" />
             </div>
           </>
         )}
       </div>
 
       {showTimingMarkers && (
-        <div className="flex justify-between mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
+        <div className="flex justify-between mt-4 text-xs font-mono text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-800 pt-2">
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase opacity-50">Start</span>
-            <span>{formatTime(startTime)}</span>
+            <span className="text-[9px] font-bold uppercase tracking-tighter text-green-600 dark:text-green-500">Start Trim</span>
+            <span className="text-gray-900 dark:text-gray-100 font-bold">{formatTime(startTime)}</span>
           </div>
 
           <div className="flex flex-col items-center">
-            <span className="text-[10px] uppercase opacity-50">Current</span>
-            <span className="text-blue-500 font-bold">{formatTime(currentTime)}</span>
+            <span className="text-[9px] font-bold uppercase tracking-tighter text-blue-500">Current</span>
+            <span className="text-blue-600 dark:text-blue-400 font-black bg-blue-50 dark:bg-blue-900/30 px-2 rounded">{formatTime(currentTime)}</span>
           </div>
 
           <div className="flex flex-col items-end">
-            <span className="text-[10px] uppercase opacity-50">End</span>
-            <span>{formatTime(endTime)}</span>
+            <span className="text-[9px] font-bold uppercase tracking-tighter text-red-600 dark:text-red-500">End Trim</span>
+            <span className="text-gray-900 dark:text-gray-100 font-bold">{formatTime(endTime)}</span>
           </div>
+        </div>
+      )}
+
+    {/* Selection Duration Badge */}
+      {audioFile && (
+        <div className="mt-4 mb-8 text-center animate-in fade-in slide-in-from-top-1 duration-500">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-200 ring-1 ring-blue-200 dark:ring-blue-800/50 shadow-sm">
+            {/* English label as requested */}
+            Selected Duration: {formatTime(endTime - startTime)}
+          </span>
         </div>
       )}
     </div>
