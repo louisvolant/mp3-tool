@@ -215,9 +215,9 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ theme }) => {
       </div>
 
     {/* Drag & Drop Area */}
-    { !audioFile && (
+    {!audioFile && (
       <div
-        className="border-2 border-dashed p-8 mb-4 text-center"
+        className="border-2 border-dashed border-gray-300 dark:border-gray-600 p-8 mb-4 text-center rounded-xl bg-gray-50/50 dark:bg-gray-800/30 hover:border-blue-500 dark:hover:border-blue-400 transition-colors duration-200"
         onDrop={handleFileUpload}
         onDragOver={(e) => e.preventDefault()}
       >
@@ -228,8 +228,11 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ theme }) => {
           className="hidden"
           id="audio-upload"
         />
-        <label htmlFor="audio-upload" className="cursor-pointer">
-          Drag & drop an MP3 file here or click to browse
+        <label htmlFor="audio-upload" className="cursor-pointer block">
+          <div className="text-gray-600 dark:text-gray-300">
+            <span className="text-lg font-medium">Drag & drop an MP3 file here</span>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">or click to browse your files</p>
+          </div>
         </label>
       </div>
     )}

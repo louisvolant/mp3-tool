@@ -18,7 +18,7 @@ interface WaveformDisplayProps {
   showTimingMarkers: boolean;
   clearRegions: React.MutableRefObject<() => void>;
   setIsTrimmed?: (isTrimmed: boolean) => void;
-  theme: string;
+  theme: string; // 'light' or 'dark'
 }
 
 export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
@@ -42,9 +42,14 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const [startPos, setStartPos] = useState(0);
   const [endPos, setEndPos] = useState(1);
-  const [initialStartPos] = useState(0); // Initial start position
-  const [initialEndPos] = useState(1);   // Initial end position
 
+  // Helper to get CSS variable values from the DOM
+  const getCssVar = (name: string) => {
+    if (typeof window === 'undefined') return '';
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  };
+
+  // Effect to handle WaveSurfer initialization
   useEffect(() => {
     if (!waveformContainerRef.current) return;
 
@@ -55,9 +60,10 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
 
     const wavesurfer = WaveSurfer.create({
       container: waveformContainerRef.current,
-      waveColor: '#A8DBA8',
-      progressColor: '#3B8686',
-      cursorColor: '#0B0C0C',
+      // Read colors from Tailwind 4 CSS variables
+      waveColor: getCssVar('--waveform-wave') || '#A8DBA8',
+      progressColor: getCssVar('--waveform-progress') || '#3B8686',
+      cursorColor: getCssVar('--waveform-cursor') || '#0B0C0C',
       barWidth: 2,
       barRadius: 3,
       cursorWidth: 1,
@@ -76,7 +82,7 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
     });
 
     wavesurfer.on('timeupdate', (time) => {
-      setCurrentTime(time);
+        setCurrentTime(time)
     });
 
     wavesurfer.on('error', (error) => {
@@ -91,7 +97,7 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
       setEndPos(1);
       setStartTime(0);
       setEndTime(wavesurfer.getDuration() || 0);
-      setIsTrimmed?.(false); // Reset trim status
+      setIsTrimmed?.(false);
     };
 
     if (audioFile) {
@@ -105,17 +111,18 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
       wavesurferRef.current = null;
       setWaveform(null);
     };
-  }, [
-      audioFile,
-      setDuration,
-      setShowTimingMarkers,
-      setCurrentTime,
-      clearRegions,
-      setStartTime,
-      setEndTime,
-      setWaveform,
-      setIsTrimmed,
-      ]);
+  }, [audioFile, setDuration, setShowTimingMarkers, setCurrentTime, clearRegions, setStartTime, setEndTime, setWaveform, setIsTrimmed]);
+
+  // Dynamic Theme Update: Updates WaveSurfer colors without re-mounting
+  useEffect(() => {
+    if (wavesurferRef.current) {
+      wavesurferRef.current.setOptions({
+        waveColor: getCssVar('--waveform-wave'),
+        progressColor: getCssVar('--waveform-progress'),
+        cursorColor: getCssVar('--waveform-cursor'),
+      });
+    }
+  }, [theme]); // Triggered whenever theme toggles
 
   const handleDrag = (type: 'start' | 'end') => {
     const container = waveformContainerRef.current;
@@ -159,26 +166,32 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
     <div className="relative w-full">
       <div
         ref={waveformContainerRef}
-        className={`h-24 relative mb-4 rounded-lg ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'}`}
+        /* Using Tailwind 4 variables for the background */
+        className="h-24 relative mb-4 rounded-lg bg-[var(--waveform-bg)] transition-colors duration-300"
       >
         {audioFile && (
           <>
+            {/* Start Marker */}
             <div
-              className="absolute top-0 bottom-0 w-2 bg-green-500 cursor-ew-resize flex items-center justify-center z-10"
+              className="absolute top-0 bottom-0 w-1 bg-green-500 cursor-ew-resize z-10 shadow-[0_0_10px_rgba(34,197,94,0.5)]"
               style={{ left: `${startPos * 100}%` }}
               onMouseDown={() => handleDrag('start')}
             >
-              <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
+              <div className="absolute -top-1 -left-1 w-3 h-3 bg-green-500 rounded-full" />
             </div>
+
+            {/* End Marker */}
             <div
-              className="absolute top-0 bottom-0 w-2 bg-red-500 cursor-ew-resize flex items-center justify-center z-10"
+              className="absolute top-0 bottom-0 w-1 bg-red-500 cursor-ew-resize z-10 shadow-[0_0_10px_rgba(239,68,68,0.5)]"
               style={{ left: `${endPos * 100}%` }}
               onMouseDown={() => handleDrag('end')}
             >
-              <div className="w-4 h-full absolute" style={{ left: '-8px' }} />
+              <div className="absolute -top-1 -left-1 w-3 h-3 bg-red-500 rounded-full" />
             </div>
+
+            {/* Selection Overlay */}
             <div
-              className="absolute top-0 bottom-0 bg-blue-300 opacity-50 z-5 rounded-md"
+              className="absolute top-0 bottom-0 bg-blue-500/20 mix-blend-multiply dark:mix-blend-screen z-5"
               style={{
                 left: `${startPos * 100}%`,
                 width: `${(endPos - startPos) * 100}%`,
@@ -187,11 +200,12 @@ export const WaveformDisplay: React.FC<WaveformDisplayProps> = ({
           </>
         )}
       </div>
+
       {showTimingMarkers && (
-        <div className={`flex justify-between mt-1 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
-          <div>{formatTime(startTime)}</div>
-          <div>{formatTime(currentTime)}</div>
-          <div>{formatTime(endTime)}</div>
+        <div className="flex justify-between mt-1 text-xs font-mono text-gray-500 dark:text-gray-400">
+          <span>{formatTime(startTime)}</span>
+          <span className="text-blue-500 font-bold">{formatTime(currentTime)}</span>
+          <span>{formatTime(endTime)}</span>
         </div>
       )}
     </div>

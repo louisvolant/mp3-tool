@@ -39,8 +39,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100 dark:bg-gray-900`}>
-        <header className="bg-blue-600 dark:bg-blue-800 text-white py-4">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300`}>
+        <header className="bg-blue-600 dark:bg-blue-800 text-white py-4 shadow-lg">
           <div className="container mx-auto px-4 flex items-center">
             <Image
               src="/icon_music.png"

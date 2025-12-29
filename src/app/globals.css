@@ -1,29 +1,28 @@
 /* src/app/globals.css */
 @import "tailwindcss";
 
-/* Tailwind 4 Theme Configuration
-   This replaces the theme.extend section from your tailwind.config.ts
-*/
 @theme {
-  /* Mapping CSS variables to Tailwind colors */
+  --color-primary: #3b82f6;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* Note: Default colors (blue, gray, red, etc.) are built-in.
-     The 'class' dark mode strategy is automatic in v4 when
-     the .dark class is present on a parent element.
-  */
+  /* Waveform Semantic Colors */
+  --waveform-bg-light: #ffffff;
+  --waveform-bg-dark: #1f2937; /* gray-800 */
+  --waveform-wave: #a8dba8;
+  --waveform-progress: #3b8686;
+  --waveform-cursor: #6b7280; /* gray-500 */
 }
 
-/* Global CSS Variables
-*/
 :root {
+  --waveform-bg: var(--waveform-bg-light);
   --background: #ffffff;
   --foreground: #171717;
 }
 
-/* Dark mode overrides */
 .dark {
+  --waveform-bg: var(--waveform-bg-dark);
   --background: #0a0a0a;
   --foreground: #ededed;
 }
@@ -36,6 +35,15 @@
     background: var(--background);
     /* Using Geist font variables defined in layout.tsx */
     font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  }
+  /* Improve default form element appearance */
+  select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+    appearance: none;
   }
 }
 
