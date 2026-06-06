@@ -11,10 +11,10 @@
   "dependencies": {
     "jsqr": "^1.4.0",
     "qrcode.react": "^4.2.0",
-    "next": "^16.1.1",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "wavesurfer.js": "^7.9.1"
+    "next": "^16.2.7",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "wavesurfer.js": "^7.12.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
@@ -23,7 +23,7 @@
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.20",
     "eslint": "^9",
-    "eslint-config-next": "15.1.6",
+    "eslint-config-next": "^16.2.7",
     "@tailwindcss/postcss": "^4.1.17",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.17",
