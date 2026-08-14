@@ -4,6 +4,9 @@ import tsPlugin from "@typescript-eslint/eslint-plugin";
 
 const eslintConfig = [
   {
+    ignores: [".next/**", "node_modules/**", "public/**", "next-env.d.ts"],
+  },
+  {
     files: ["**/*.{js,mjs,cjs,ts,tsx}"],
     languageOptions: {
       parser: tsParser,
