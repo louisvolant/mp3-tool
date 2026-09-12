@@ -2,33 +2,35 @@
 
 ## Description
 
-MP3 Audio Editor is a web application built with Next.js that allows users to upload, trim, and enhance audio files. It provides an intuitive interface for visualizing waveforms, selecting specific timeframes, and applying various audio effects.
+MP3 Audio Editor is a web application built with Next.js that allows users to upload, trim, and enhance audio files directly in the browser. It provides an intuitive interface for visualizing waveforms, selecting specific timeframes, and applying various audio effects.
 
 ## Features
 
-- Audio Upload: Upload MP3 files for editing.
-- Waveform Visualization: Display and interact with audio waveforms.
-- Audio Trimming: Select and trim specific sections of the audio.
-- Volume Control: Adjust the volume of the audio.
-- Fade Effects: Apply fade-in and fade-out effects.
-- Bitrate Selection: Choose the bitrate for exporting audio files.
-- Responsive Design: Works seamlessly on desktop and mobile devices.
+- **Audio Upload**: Upload MP3 files for editing.
+- **Waveform Visualization**: Display and interact with audio waveforms.
+- **Audio Trimming**: Select and trim specific sections of the audio.
+- **Volume Control**: Adjust the volume of the audio.
+- **Fade Effects**: Apply fade-in and fade-out effects.
+- **Bitrate Selection**: Choose the bitrate for exporting audio files.
+- **Responsive Design**: Works seamlessly on desktop and mobile devices.
+- **Static & Edge-Ready**: Built for fast static delivery on Cloudflare.
 
 ## Technologies Used
 
-- Next.js
-- React
-- TypeScript
-- Tailwind CSS
-- WaveSurfer.js (for waveform visualization)
-- LameJS (for MP3 encoding)
+- [Next.js](https://nextjs.org/) (Static HTML Export)
+- [React](https://react.dev/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [WaveSurfer.js](https://wavesurfer.xyz/) (waveform visualization)
+- [LameJS](https://github.com/higuma/web-audio-recorder-js) (MP3 encoding)
+- [Cloudflare Workers / Pages](https://developers.cloudflare.com/) & [Wrangler](https://developers.cloudflare.com/workers/wrangler/)
 
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js (v14 or later)
-- npm (v6 or later)
+- Node.js (v20 or later, v24 recommended)
+- npm (v10 or later)
 
 ### Installation
 
@@ -52,7 +54,7 @@ MP3 Audio Editor is a web application built with Next.js that allows users to up
    npm run dev
    ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## Usage
 
@@ -63,22 +65,69 @@ MP3 Audio Editor is a web application built with Next.js that allows users to up
 
 ## Building for Production
 
-To create a production build, run:
+To create a static production build exported to the `out/` directory:
+
 ```bash
 npm run build
 ```
 
-## Type Checking
+## Cloudflare Deployment
 
-Before pushing your changes, it's recommended to run type checking to catch any TypeScript errors:
+This project is configured for seamless deployment to Cloudflare using Cloudflare Workers (Static Assets) or Cloudflare Pages.
+
+### Wrangler Configuration (`wrangler.toml`)
+
+The project includes a `wrangler.toml` file configured with:
+- `keep_vars = true`: Prevents Wrangler deployments from overwriting or deleting environment variables defined in the Cloudflare Dashboard.
+- `[assets]`: Points directly to `./out` with automatic trailing slash and 404 page routing.
+
+### Deploying via Wrangler (Cloudflare Workers)
+
+1. Authenticate with your Cloudflare account (if not already logged in):
+   ```bash
+   npx wrangler login
+   ```
+
+2. Preview locally using Wrangler:
+   ```bash
+   npm run preview
+   ```
+
+3. Build and deploy to Cloudflare:
+   ```bash
+   npm run deploy
+   ```
+
+### Deploying to Cloudflare Pages
+
+#### Option A: Via CLI
 ```bash
+npm run deploy:pages
+```
+
+#### Option B: Via Cloudflare Dashboard (Git Integration)
+1. Go to **Workers & Pages** in your Cloudflare dashboard.
+2. Click **Create application** > **Pages** > **Connect to Git**.
+3. Select this repository.
+4. Set the build configuration:
+   - **Framework preset**: `Next.js (Static HTML Export)`
+   - **Build command**: `npm run build`
+   - **Build output directory**: `out`
+5. Click **Save and Deploy**.
+
+## Type Checking & Linting
+
+Before pushing your changes, run type checking and linting:
+
+```bash
+# Type check and build
 npm run build
-# then
+
+# Run ESLint
+npm run lint
+
+# TypeScript check without build
 npx tsc --noEmit
-# or
-node --no-warnings node_modules/.bin/tsc --noEmit
-# or
-npx --no-warnings tsc --noEmit
 ```
 
 ## Contributing
@@ -92,5 +141,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 - [Next.js](https://nextjs.org/)
-- WaveSurfer.js
-- LameJS
+- [WaveSurfer.js](https://wavesurfer.xyz/)
+- [Cloudflare](https://developers.cloudflare.com/)
