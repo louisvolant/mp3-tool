@@ -16,6 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://mp3-tool.louisvolant.com"),
   title: "Audio Editor - Trim and Enhance Your Audio Files",
   description: "A comprehensive tool to edit, trim, and enhance your audio files with ease.",
   keywords: "audio editor, trim audio, enhance audio, waveform editor, audio effects",
