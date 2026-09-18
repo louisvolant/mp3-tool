@@ -14,7 +14,7 @@ MP3 Audio Editor is a web application built with Next.js that allows users to up
 - **Bitrate Selection**: Choose the bitrate for exporting audio files.
 - **Responsive Design**: Works seamlessly on desktop and mobile devices.
 - **Static & Edge-Ready**: Built for fast static delivery on Cloudflare.
-- **Footer External Projects**: Navigation links to companion projects including Whois (`whois.louisvolant.com`) and MyFilmList.
+- **Footer External Projects**: Navigation links to companion projects including Whois (`whois.louisvolant.com`), Currency Converter (`currency-converter.louisvolant.com`), and MyFilmList.
 
 ## Technologies Used
 
@@ -141,7 +141,7 @@ The footer links to several related projects and tools across the ecosystem:
 - **Sun Over The Cloud**: [sunoverthe.cloud](https://sunoverthe.cloud)
 - **Build My CV**: [buildmycv.net](https://buildmycv.net)
 - **My 20 years old blog**: [abricocotier.fr](https://www.abricocotier.fr)
-- **Currency Converter**: [currency-converter-pwa-js.vercel.app](https://currency-converter-pwa-js.vercel.app/)
+- **Currency Converter**: [currency-converter.louisvolant.com](https://currency-converter.louisvolant.com)
 - **Whois**: [whois.louisvolant.com](https://whois.louisvolant.com)
 - **MyFilmList**: [myfilmlist.net](https://www.myfilmlist.net)
 - **FuelStats**: [fuelstats.net](https://www.fuelstats.net)
