@@ -29,9 +29,6 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ theme }) => {
   const [showTimingMarkers, setShowTimingMarkers] = useState(false);
   const [isTrimmed, setIsTrimmed] = useState(false); // New state to track trim changes
 
-  useEffect(() => {
-    console.log('audioFile changed:', audioFile);
-  }, [audioFile]);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -186,25 +183,6 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ theme }) => {
     clearRegionsRef.current();
   };
 
-  const previewFade = async (type: 'fadeIn' | 'fadeOut') => {
-    const processedBuffer = await processAudio(
-      audioFile!,
-      false,
-      false,
-      volume,
-      type === 'fadeIn',
-      fadeInDuration,
-      type === 'fadeOut',
-      fadeOutDuration,
-      startTime,
-      endTime
-    );
-    if (processedBuffer && waveform) {
-      const blob = new Blob([bufferToWav(processedBuffer)], { type: 'audio/wav' });
-      const url = URL.createObjectURL(blob);
-      waveform.load(url);
-    }
-  };
 
   const handlePlayPause = () => {
     if (isPlaying) {
@@ -222,16 +200,12 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ theme }) => {
     }
   };
 
-  useEffect(() => {
-    console.log('AudioEditor - startTime:', startTime.toFixed(2), 'endTime:', endTime.toFixed(2));
-  }, [startTime, endTime]);
-
   return (
     <div className="p-4 max-w-4xl mx-auto relative">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">Audio Editor</h1>
         {audioFile && (
-          <button onClick={resetEditor} className="px-3 py-1 bg-red-600 text-white rounded">
+          <button onClick={resetEditor} className="px-3 py-1 bg-red-600 text-white rounded cursor-pointer">
             Reset
           </button>
         )}
@@ -240,7 +214,6 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ theme }) => {
     {/* Drag & Drop Area */}
     {!audioFile && (
       <div
-        /* Increased border contrast and adjusted background opacity */
         className="border-2 border-dashed border-gray-300 dark:border-gray-600 p-12 mb-4 text-center rounded-2xl bg-gray-100/40 dark:bg-gray-800/20 hover:border-blue-500 dark:hover:border-blue-400 transition-all duration-300 group"
         onDrop={handleFileUpload}
         onDragOver={(e) => e.preventDefault()}
@@ -300,10 +273,10 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ theme }) => {
               onPlayPause={handlePlayPause}
               onStop={handleStop}
             />
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
               <button
                 onClick={clearSelections}
-                className="px-4 py-2 bg-gray-500 text-white rounded"
+                className="px-4 py-2 bg-gray-500 text-white rounded cursor-pointer"
               >
                 Clear Selection
               </button>
@@ -332,7 +305,7 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ theme }) => {
                   }
                 }}
                 className={`px-4 py-2 bg-blue-600 text-white rounded ${
-                  Math.abs(startTime - endTime) <= 0.001 ? 'opacity-50 cursor-not-allowed' : ''
+                  Math.abs(startTime - endTime) <= 0.001 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                 }`}
                 disabled={Math.abs(startTime - endTime) <= 0.001}
               >
@@ -345,20 +318,16 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ theme }) => {
               )}
             </div>
           </div>
+          {/* Fade/volume effects are applied at export time — no live preview to avoid
+              blocking the UI or corrupting the waveform state */}
           <EffectPanels
             volume={volume}
             fadeInDuration={fadeInDuration}
             fadeOutDuration={fadeOutDuration}
             bitrate={bitrate}
             onVolumeChange={setVolume}
-            onFadeInChange={(value) => {
-              setFadeInDuration(value);
-              previewFade('fadeIn');
-            }}
-            onFadeOutChange={(value) => {
-              setFadeOutDuration(value);
-              previewFade('fadeOut');
-            }}
+            onFadeInChange={setFadeInDuration}
+            onFadeOutChange={setFadeOutDuration}
             onBitrateChange={setBitrate}
           />
           <ExportPanels isProcessing={isProcessing} onSave={saveFile} />

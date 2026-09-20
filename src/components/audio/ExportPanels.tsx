@@ -12,7 +12,7 @@ export const ExportPanels: React.FC<ExportPanelsProps> = ({ isProcessing, onSave
     <button
       onClick={onSave}
       disabled={isProcessing}
-      className={`px-4 py-2 bg-purple-600 text-white rounded flex items-center justify-center gap-2 ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+      className={`px-4 py-2 bg-purple-600 text-white rounded flex items-center justify-center gap-2 ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       {isProcessing ? (
         <>
