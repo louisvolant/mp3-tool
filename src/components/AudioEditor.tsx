@@ -115,17 +115,40 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ theme }) => {
         intSamplesRight[i] = Math.max(-32768, Math.min(32767, Math.round(samplesRight[i] * 32767)));
       }
 
+      // Encode in async batches to avoid blocking the main thread (which causes
+      // "page unresponsive" warnings on large files). Each batch encodes
+      // CHUNKS_PER_TICK lame frames then yields back to the event loop via
+      // a zero-delay setTimeout before processing the next batch.
       const bufferSize = 1152;
-      for (let i = 0; i < intSamplesLeft.length; i += bufferSize) {
-        const leftChunk = intSamplesLeft.subarray(i, i + bufferSize);
-        const rightChunk = intSamplesRight.subarray(i, i + bufferSize);
-        const mp3buf =
-          numChannels === 1
-            ? mp3Encoder.encodeBuffer(leftChunk)
-            : mp3Encoder.encodeBuffer(leftChunk, rightChunk);
-        console.log('MP3 buffer length:', mp3buf.byteLength);
-        if (mp3buf.byteLength > 0) mp3Data.push(mp3buf);
-      }
+      const CHUNKS_PER_TICK = 100; // ~115 200 samples per tick
+      const totalChunks = Math.ceil(intSamplesLeft.length / bufferSize);
+
+      await new Promise<void>((resolve) => {
+        let chunkIndex = 0;
+
+        const processBatch = () => {
+          const end = Math.min(chunkIndex + CHUNKS_PER_TICK, totalChunks);
+          for (; chunkIndex < end; chunkIndex++) {
+            const i = chunkIndex * bufferSize;
+            const leftChunk = intSamplesLeft.subarray(i, i + bufferSize);
+            const rightChunk = intSamplesRight.subarray(i, i + bufferSize);
+            const mp3buf =
+              numChannels === 1
+                ? mp3Encoder.encodeBuffer(leftChunk)
+                : mp3Encoder.encodeBuffer(leftChunk, rightChunk);
+            if (mp3buf.byteLength > 0) mp3Data.push(mp3buf);
+          }
+
+          if (chunkIndex < totalChunks) {
+            // Yield to browser, then continue with the next batch
+            setTimeout(processBatch, 0);
+          } else {
+            resolve();
+          }
+        };
+
+        processBatch();
+      });
 
       const ending = mp3Encoder.flush();
       if (ending.byteLength > 0) mp3Data.push(ending);

@@ -7,11 +7,12 @@ MP3 Audio Editor is a web application built with Next.js that allows users to up
 ## Features
 
 - **Audio Upload**: Upload MP3 files for editing.
-- **Waveform Visualization**: Display and interact with audio waveforms.
-- **Audio Trimming**: Select and trim specific sections of the audio.
+- **Waveform Visualization**: Display and interact with audio waveforms. Click anywhere on the waveform to seek to that position.
+- **Audio Trimming**: Select and trim specific sections of the audio using draggable start/end markers.
 - **Volume Control**: Adjust the volume of the audio.
 - **Fade Effects**: Apply fade-in and fade-out effects.
 - **Bitrate Selection**: Choose the bitrate for exporting audio files.
+- **Non-blocking MP3 Export**: MP3 encoding runs in async batches so the browser stays responsive even for large files.
 - **Responsive Design**: Works seamlessly on desktop and mobile devices.
 - **Static & Edge-Ready**: Built for fast static delivery on Cloudflare.
 - **Footer External Projects**: Navigation links to companion projects including Whois (`whois.louisvolant.com`), Currency Converter (`currency-converter.louisvolant.com`), and MyFilmList.
