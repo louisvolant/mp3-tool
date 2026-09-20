@@ -178,24 +178,38 @@ const handleDrag = (type: 'start' | 'end') => {
     return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
+  // Seek WaveSurfer to the clicked position on the waveform container
+  const handleWaveformClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    const container = waveformContainerRef.current;
+    if (!container || !wavesurferRef.current || !duration) return;
+    // Ignore clicks that originated from a drag handle
+    if ((e.target as HTMLElement).closest('[data-drag-handle]')) return;
+    const rect = container.getBoundingClientRect();
+    const pos = (e.clientX - rect.left) / rect.width;
+    wavesurferRef.current.seekTo(Math.max(0, Math.min(1, pos)));
+  };
+
   return (
     <div className="relative w-full pt-4">
       <div
         ref={waveformContainerRef}
         className="h-24 relative mb-4 rounded-lg bg-[var(--waveform-bg)] transition-all duration-300 ring-1 ring-gray-200 dark:ring-gray-700 shadow-inner"
+        onClick={handleWaveformClick}
       >
         {audioFile && (
           <>
-            {/* Selection Overlay */}
+            {/* Selection Overlay — pointer-events-none so clicks pass through to WaveSurfer */}
             <div
-              className="absolute top-0 bottom-0 bg-blue-500/15 backdrop-blur-[1px] z-5 transition-all"
+              className="absolute top-0 bottom-0 bg-blue-500/15 backdrop-blur-[1px] z-5 transition-all pointer-events-none"
               style={{
                 left: `${startPos * 100}%`,
                 width: `${(endPos - startPos) * 100}%`,
               }}
             />
 
+            {/* Start Marker (Green) */}
             <div
+              data-drag-handle="start"
               className="absolute top-0 bottom-0 w-4 cursor-ew-resize z-20 flex justify-center group/start"
               style={{ left: `calc(${startPos * 100}% - 8px)` }}
               onMouseDown={() => handleDrag('start')}
@@ -207,6 +221,7 @@ const handleDrag = (type: 'start' | 'end') => {
 
             {/* End Marker (Red) */}
             <div
+              data-drag-handle="end"
               className="absolute top-0 bottom-0 w-4 cursor-ew-resize z-20 flex justify-center group/end"
               style={{ left: `calc(${endPos * 100}% - 8px)` }}
               onMouseDown={() => handleDrag('end')}
