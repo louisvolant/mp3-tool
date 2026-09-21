@@ -200,8 +200,10 @@ const AudioEditor: React.FC<AudioEditorProps> = ({ theme }) => {
     }
   };
 
+  // The editor shell grows with the viewport (see .editor-shell) so the
+  // waveform and drag & drop areas stay large on wide screens.
   return (
-    <div className="p-4 max-w-4xl mx-auto relative">
+    <div className="p-4 editor-shell mx-auto relative">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-xl font-bold">Audio Editor</h1>
         {audioFile && (

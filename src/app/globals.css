@@ -58,4 +58,14 @@ html, body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  /* Responsive editor shell.
+     On large screens the editor (waveform + drag & drop areas) grows with the
+     viewport to about 70% of the window width, kept between 60% and 80%.
+     It never becomes narrower than the previous max-w-4xl (56rem / 896px),
+     and max-width keeps it inside the viewport on small screens. */
+  .editor-shell {
+    width: clamp(56rem, 70vw, 80vw);
+    max-width: 100%;
+  }
 }
