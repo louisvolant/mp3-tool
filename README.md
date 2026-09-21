@@ -16,7 +16,7 @@ MP3 Audio Editor is a web application built with Next.js that allows users to up
 - **Responsive Design**: Works seamlessly on desktop and mobile devices.
 - **Adaptive Editor Width**: On wide screens the waveform and drag & drop areas expand to roughly 70% of the window width (kept between 60% and 80%) while never shrinking below the original width.
 - **Static & Edge-Ready**: Built for fast static delivery on Cloudflare.
-- **Footer External Projects**: Navigation links to companion projects including Whois (`whois.louisvolant.com`), Currency Converter (`currency-converter.louisvolant.com`), and MyFilmList.
+- **Compact Single-Line Footer**: A concise footer with the copyright notice, links to the Personal Page and Portfolio, and a dark mode toggle.
 
 ## Technologies Used
 
@@ -133,11 +133,17 @@ npm run lint
 npx tsc --noEmit
 ```
 
-## External Links & Projects
+## Footer Links
 
-The footer links to several related projects and tools across the ecosystem:
+The footer is kept on a single line and links to the author's pages:
 
 - **Personal Page**: [louisvolant.com](https://www.louisvolant.com)
+- **Portfolio**: [louisvolant.com/portfolio](https://www.louisvolant.com/portfolio)
+
+## Related Projects
+
+Other projects from the same author, kept here for reference:
+
 - **Password Keeper**: [securaised.net](https://www.securaised.net)
 - **Skipass Checker**: [skipass-earlybird-checker.louisvolant.com](https://skipass-earlybird-checker.louisvolant.com)
 - **Sun Over The Cloud**: [sunoverthe.cloud](https://sunoverthe.cloud)
