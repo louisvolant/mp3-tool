@@ -33,11 +33,25 @@ test.describe('SEO metadata', () => {
     expect(await metaContent(page, 'meta[property="og:description"]')).toBeTruthy();
     expect(await metaContent(page, 'meta[property="og:type"]')).toBe('website');
     expect(await metaContent(page, 'meta[property="og:site_name"]')).toBe(SITE_NAME);
-    expect(await metaContent(page, 'meta[property="og:image"]')).toContain('/icon_music.png');
+    expect(await metaContent(page, 'meta[property="og:image"]')).toContain('/og-image.png');
+    expect(await metaContent(page, 'meta[property="og:image:width"]')).toBe('1200');
+    expect(await metaContent(page, 'meta[property="og:image:height"]')).toBe('630');
 
     expect(await metaContent(page, 'meta[name="twitter:card"]')).toBe('summary_large_image');
     expect(await metaContent(page, 'meta[name="twitter:title"]')).toContain('Audio Editor');
-    expect(await metaContent(page, 'meta[name="twitter:image"]')).toContain('/icon_music.png');
+    expect(await metaContent(page, 'meta[name="twitter:image"]')).toContain('/og-image.png');
+  });
+
+  test('serves a 1200x630 Open Graph image', async ({ page }) => {
+    const response = await page.request.get('/og-image.png');
+    expect(response.ok()).toBeTruthy();
+    expect(response.headers()['content-type']).toContain('image/png');
+
+    // A proper OG image is 1200x630; verify the PNG IHDR header dimensions.
+    const body = await response.body();
+    const width = body.readUInt32BE(16);
+    const height = body.readUInt32BE(20);
+    expect({ width, height }).toEqual({ width: 1200, height: 630 });
   });
 
   test('is indexable by search engines', async ({ page }) => {

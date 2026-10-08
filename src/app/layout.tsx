@@ -74,9 +74,9 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "/icon_music.png",
+        url: "/og-image.png",
         width: 1200,
-        height: 1200,
+        height: 630,
         alt: SITE_NAME,
       },
     ],
@@ -85,7 +85,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
-    images: ["/icon_music.png"],
+    images: ["/og-image.png"],
   },
   icons: [
     { rel: "icon", url: "/icon_music.png" },
@@ -109,6 +109,7 @@ const structuredData = {
   name: SITE_NAME,
   url: SITE_URL,
   description: SITE_DESCRIPTION,
+  image: `${SITE_URL}/og-image.png`,
   applicationCategory: "MultimediaApplication",
   operatingSystem: "Web browser",
   offers: {
