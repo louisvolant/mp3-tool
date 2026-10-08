@@ -6,7 +6,7 @@ test.describe('Landing page', () => {
   });
 
   test('renders the header and the editor heading', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'MP3 Tool', level: 1 })).toBeVisible();
+    await expect(page.getByText('MP3 Tool', { exact: true })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Audio Editor', level: 1 })).toBeVisible();
   });
 

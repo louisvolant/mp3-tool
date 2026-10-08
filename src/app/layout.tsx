@@ -1,5 +1,5 @@
 // src/app/layout.tsx
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Image from 'next/image';
 import "./globals.css";
@@ -15,22 +15,112 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// Central SEO constants reused across metadata, structured data and the manifest.
+const SITE_URL = "https://mp3-tool.louisvolant.com";
+const SITE_NAME = "MP3 Audio Editor";
+const SITE_TITLE = "Audio Editor - Trim and Enhance Your Audio Files";
+const SITE_DESCRIPTION =
+  "Free online MP3 audio editor: upload a track, visualize its waveform, trim, adjust volume, apply fades and export a new MP3 file — all in your browser.";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://mp3-tool.louisvolant.com"),
-  title: "Audio Editor - Trim and Enhance Your Audio Files",
-  description: "A comprehensive tool to edit, trim, and enhance your audio files with ease.",
-  keywords: "audio editor, trim audio, enhance audio, waveform editor, audio effects",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: SITE_TITLE,
+    template: `%s | ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: [
+    "audio editor",
+    "mp3 editor",
+    "trim mp3",
+    "cut audio",
+    "audio trimmer",
+    "waveform editor",
+    "fade in",
+    "fade out",
+    "online audio editor",
+  ],
+  authors: [{ name: "Louis Volant", url: "https://www.louisvolant.com" }],
+  creator: "Louis Volant",
+  publisher: "Louis Volant",
+  category: "Multimedia",
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  manifest: "/manifest.webmanifest",
   openGraph: {
-    title: "Audio Editor - Trim and Enhance Your Audio Files",
-    description: "Edit and enhance your audio files effortlessly with our intuitive audio editor.",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
     type: "website",
-    url: "https://mp3-tool.louisvolant.com",
-    images: ['/icon_music.png'],
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    locale: "en_US",
+    images: [
+      {
+        url: "/icon_music.png",
+        width: 1200,
+        height: 1200,
+        alt: SITE_NAME,
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    images: ["/icon_music.png"],
   },
   icons: [
     { rel: "icon", url: "/icon_music.png" },
     { rel: "apple-touch-icon", url: "/icon_music.png" },
   ],
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+};
+
+// JSON-LD structured data helps search engines understand the app.
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: SITE_NAME,
+  url: SITE_URL,
+  description: SITE_DESCRIPTION,
+  applicationCategory: "MultimediaApplication",
+  operatingSystem: "Web browser",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+  author: {
+    "@type": "Person",
+    name: "Louis Volant",
+    url: "https://www.louisvolant.com",
+  },
 };
 
 export default function RootLayout({
@@ -51,7 +141,7 @@ export default function RootLayout({
               priority
               className="h-8 w-8 mr-2"
             />
-            <h1 className="text-2xl font-bold">MP3 Tool</h1>
+            <span className="text-2xl font-bold">MP3 Tool</span>
           </div>
         </header>
 
@@ -60,6 +150,12 @@ export default function RootLayout({
         </main>
 
         <Footer />
+
+        {/* Structured data for rich results */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
       </body>
     </html>
   );
