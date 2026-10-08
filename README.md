@@ -118,6 +118,29 @@ npm run deploy:pages
    - **Build output directory**: `out`
 5. Click **Save and Deploy**.
 
+## End-to-End Testing
+
+End-to-end tests are written with [Playwright](https://playwright.dev/) and live in the
+`e2e/` directory. They cover the landing page, theming, audio upload (both the file
+picker and drag & drop), the editor controls, and the responsive editor width.
+
+```bash
+# Install the Chromium browser used by the tests (first run only)
+npx playwright install chromium
+
+# Run the suite (starts the Next.js dev server automatically)
+npm run test:e2e
+
+# Run in interactive UI mode
+npm run test:e2e:ui
+
+# Open the last HTML report
+npm run test:e2e:report
+```
+
+The suite relies on a small generated MP3 fixture located at
+`e2e/fixtures/sample.mp3`.
+
 ## Type Checking & Linting
 
 Before pushing your changes, run type checking and linting:
