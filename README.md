@@ -14,7 +14,7 @@ MP3 Audio Editor is a web application built with Next.js that allows users to up
 - **Bitrate Selection**: Choose the bitrate for exporting audio files.
 - **Non-blocking MP3 Export**: MP3 encoding runs in async batches so the browser stays responsive even for large files.
 - **Responsive Design**: Works seamlessly on desktop and mobile devices.
-- **Adaptive Editor Width**: On wide screens the waveform and drag & drop areas expand to roughly 70% of the window width (kept between 60% and 80%) while never shrinking below the original width.
+- **Adaptive Editor Width**: On wide screens the waveform and drag & drop areas expand to roughly 90% of the window width, keeping left and right margins small while never shrinking below the original width.
 - **Static & Edge-Ready**: Built for fast static delivery on Cloudflare.
 - **Compact Single-Line Footer**: A concise footer with the copyright notice, links to the Personal Page and Portfolio, and a dark mode toggle.
 

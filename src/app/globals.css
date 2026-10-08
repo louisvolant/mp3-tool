@@ -61,11 +61,12 @@ html, body {
 
   /* Responsive editor shell.
      On large screens the editor (waveform + drag & drop areas) grows with the
-     viewport to about 70% of the window width, kept between 60% and 80%.
+     viewport to about 90% of the window width, reducing the left/right margins
+     by roughly a factor of three compared to the previous 70vw width.
      It never becomes narrower than the previous max-w-4xl (56rem / 896px),
      and max-width keeps it inside the viewport on small screens. */
   .editor-shell {
-    width: clamp(56rem, 70vw, 80vw);
+    width: clamp(56rem, 90vw, 92vw);
     max-width: 100%;
   }
 }
